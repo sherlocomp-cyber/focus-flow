@@ -2,7 +2,7 @@
 // sw.js sengaja tidak disalin: di dalam APK semua aset sudah lokal, jadi service worker tidak diperlukan.
 const fs = require('fs');
 const files = [
-  'index.html', 'styles.css', 'improve.css', 'paper.css',
+  'index.html', 'styles.css', 'improve.css', 'ux.css', 'paper.css',
   'core.js', 'goals-tasks.js', 'habits-focus.js', 'init.js', 'improve.js', 'paper.js',
   'manifest.webmanifest', 'icon.svg'
 ];
