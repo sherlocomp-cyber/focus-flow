@@ -1,7 +1,4 @@
-.DS_Store
-Thumbs.db
-*.log
 node_modules/
-.vscode/
-.idea/
-focusflow-backup-*.json
+android/
+www/
+focusflow-debug.keystore
