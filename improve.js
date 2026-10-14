@@ -464,9 +464,21 @@ window.applyDrop=function(id,target){
     saveDB();
   }
 };
+/* Render ulang daftar tujuan: bagian "Ditunda" + pengikatan ulang milestone (XP sekali) */
 const _renderGoals=window.renderGoals;
 window.renderGoals=function(){
   _renderGoals.apply(this,arguments);
+  const list=$("#goalList");
+  if(list){
+    const paused=DB.goals.filter(g=>g.status==="ditunda");
+    let box=$("#goalPaused");
+    if(!box){box=document.createElement("details");box.id="goalPaused";box.style.marginTop="14px";list.insertAdjacentElement("afterend",box)}
+    const wasOpen=box.open;
+    box.style.display=paused.length?"":"none";
+    box.innerHTML=paused.length?`<summary class="muted" style="cursor:pointer;font-size:13px;font-weight:800">Ditunda (${paused.length})</summary><div class="goal-list" style="margin-top:10px">${paused.map(g=>goalCard(g)).join("")}</div>`:"";
+    box.open=wasOpen&&paused.length>0;
+    try{bindGoalEvents()}catch(e){}   /* kartu di bagian Ditunda perlu tombol Edit/Roadmap yang aktif */
+  }
   $$("[data-ms-toggle]").forEach(b=>b.onclick=()=>{
     const g=goalById(b.dataset.goalId),m=g&&g.milestones.find(x=>x.id===b.dataset.msToggle);if(!m)return;
     const prevXp=DB.profile.xp||0,prevAwarded=m.xpAwarded;
@@ -492,11 +504,17 @@ window.saveGoalWizard=function(old){
   saveDB();renderGoals();renderHome();
 };
 
-/* (g) Tujuan tidak bisa ditandai selesai atau dihapus (status hanya "aktif"). Tambahkan keduanya, lengkap dengan Urungkan. */
+/* (g) Status tujuan: Tandai selesai, Tunda / Lanjutkan, Hapus (semua dengan Urungkan).
+       Sebelumnya status hanya "aktif" dan tidak bisa diubah dari UI. */
 const _goalCard=window.goalCard;
 window.goalCard=function(g){
   const html=_goalCard.apply(this,arguments);
-  const extra=`<button class="pill-btn" data-goal-status="${g.id}">${g.status==="selesai"?"Aktifkan lagi":"Tandai selesai"}</button><button class="pill-btn ghost" style="color:var(--danger)" data-goal-del="${g.id}" aria-label="Hapus tujuan ${escapeHtml(g.title)}">Hapus</button>`;
+  const main=g.status==="ditunda"
+    ?`<button class="pill-btn" data-goal-pause="${g.id}">Lanjutkan</button>`
+    :g.status==="selesai"
+      ?`<button class="pill-btn" data-goal-status="${g.id}">Aktifkan lagi</button>`
+      :`<button class="pill-btn" data-goal-status="${g.id}">Tandai selesai</button><button class="pill-btn" data-goal-pause="${g.id}">Tunda</button>`;
+  const extra=main+`<button class="pill-btn ghost" style="color:var(--danger)" data-goal-del="${g.id}" aria-label="Hapus tujuan ${escapeHtml(g.title)}">Hapus</button>`;
   return html.replace(`data-goal-select="${g.id}">Roadmap</button></div>`,`data-goal-select="${g.id}">Roadmap</button>${extra}</div>`);
 };
 document.addEventListener("click",e=>{
@@ -506,6 +524,14 @@ document.addEventListener("click",e=>{
     const prev=g.status;g.status=prev==="selesai"?"aktif":"selesai";
     saveDB();renderGoals();renderHome();
     toast(g.status==="selesai"?"Tujuan ditandai selesai. 🎉":"Tujuan diaktifkan lagi.",{label:"Urungkan",action:()=>{g.status=prev;saveDB();renderGoals();renderHome()}});
+    return;
+  }
+  const pa=e.target.closest("[data-goal-pause]");
+  if(pa){
+    const g=goalById(pa.dataset.goalPause);if(!g)return;
+    const prev=g.status;g.status=prev==="ditunda"?"aktif":"ditunda";
+    saveDB();renderGoals();renderHome();
+    toast(g.status==="ditunda"?"Tujuan ditunda. Kamu bisa melanjutkannya dari bagian “Ditunda”.":"Tujuan dilanjutkan.",{label:"Urungkan",action:()=>{g.status=prev;saveDB();renderGoals();renderHome()}});
     return;
   }
   const del=e.target.closest("[data-goal-del]");
@@ -526,7 +552,7 @@ document.addEventListener("click",e=>{
 });
 
 /* ---------- 16. INISIALISASI ---------- */
-const ver=$("#appVersion");if(ver)ver.textContent="v1.5.0";
+const ver=$("#appVersion");if(ver)ver.textContent="v1.5.1";
 applyTheme();
 renderHome();
 renderFocusUI();
