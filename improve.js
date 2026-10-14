@@ -268,10 +268,65 @@ document.addEventListener("keydown",e=>{
   else if((e.key==="n"||e.key==="N")&&typeof openTaskModal==="function"){e.preventDefault();openTaskModal()}
 });
 
-/* ---------- 13. INISIALISASI ---------- */
-const ver=$("#appVersion");if(ver)ver.textContent="v1.2.0";
+/* ---------- 13. HABIT: kolom pencarian (muncul jika habit aktif ≥ 5) ---------- */
+let habitQuery="";
+function applyHabitFilter(){
+  const list=$("#habitList");if(!list||!list.parentNode)return;
+  let box=$("#habitSearch");
+  if(!box){
+    box=document.createElement("input");
+    box.id="habitSearch";box.type="search";box.className="task-search";
+    box.placeholder="Cari habit…";box.setAttribute("aria-label","Cari habit");
+    box.style.cssText="width:100%;margin-top:14px";
+    box.addEventListener("input",()=>{habitQuery=box.value;applyHabitFilter()});
+    list.parentNode.insertBefore(box,list);
+  }
+  let none=$("#habitNoResult");
+  if(!none){
+    none=document.createElement("div");
+    none.id="habitNoResult";none.className="empty-placeholder";none.textContent="Tidak ada habit yang cocok.";
+    none.style.cssText="display:none;min-height:90px;margin-top:10px";
+    list.parentNode.insertBefore(none,list.nextSibling);
+  }
+  const cards=[...list.querySelectorAll(".habit-card")];
+  const many=cards.length>=5,q=many?habitQuery.trim().toLowerCase():"";
+  box.style.display=many?"":"none";
+  let shown=0;
+  cards.forEach(c=>{
+    const text=[...c.querySelectorAll(".habit-name,.habit-meta")].map(x=>x.textContent).join(" ").toLowerCase();
+    const ok=!q||text.includes(q);
+    c.style.display=ok?"":"none";if(ok)shown++;
+  });
+  none.style.display=q&&!shown?"grid":"none";
+}
+const _renderHabitList=window.renderHabitList;
+window.renderHabitList=function(){_renderHabitList.apply(this,arguments);try{applyHabitFilter()}catch(e){}};
+
+/* ---------- 14. LAYAR PENUH TIMER: tampilan minimal + label tombol + modal tetap terlihat ---------- */
+const fsStyle=document.createElement("style");
+fsStyle.textContent=
+"#page-fokus:fullscreen{background:var(--bg);overflow:auto;display:grid;place-items:center;padding:16px}"+
+"#page-fokus:fullscreen .bento-grid{display:block;width:min(760px,100%)}"+
+"#page-fokus:fullscreen .bento-card:not(.focus-main-card){display:none}"+
+"#page-fokus:fullscreen .focus-main-card{min-height:min(720px,94vh);animation:none}";
+document.head.appendChild(fsStyle);
+const fsBtn=$("#focusFullscreen");
+document.addEventListener("fullscreenchange",()=>{
+  if(!fsBtn)return;
+  const l=document.fullscreenElement?"Keluar layar penuh":"Layar penuh";
+  fsBtn.title=l;fsBtn.setAttribute("aria-label",l);
+});
+/* Modal (mis. refleksi di akhir sesi) berada di luar elemen layar penuh sehingga tidak terlihat; keluar dulu. */
+const modalBd=$("#modalBackdrop");
+if(modalBd)new MutationObserver(()=>{
+  if(modalBd.classList.contains("open")&&document.fullscreenElement)document.exitFullscreen().catch(()=>{});
+}).observe(modalBd,{attributes:true,attributeFilter:["class"]});
+
+/* ---------- 15. INISIALISASI ---------- */
+const ver=$("#appVersion");if(ver)ver.textContent="v1.3.0";
 applyTheme();
 renderHome();
 renderFocusUI();
 syncNotifyBtn();
+applyHabitFilter();
 })();
