@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.2] — 2026-10-15
+
+Sinkronisasi berkas aplikasi, service worker, dan dokumentasi.
+
+### Diperbaiki
+- `ux.css` ternyata belum dimuat oleh `index.html`, sehingga perbaikan UI/UX v1.0.1 tidak aktif. Kini dimuat setelah `improve.css` dan sebelum `paper.css` (tema Kertas tetap menang untuk aturan tema).
+- `sw.js`: daftar `ASSETS` kini memuat `improve.css`, `ux.css`, `paper.css`, `improve.js`, `paper.js`. Aset di-cache satu per satu, jadi satu berkas yang gagal tidak lagi membatalkan pemasangan service worker.
+- `prepare-www.js`: `ux.css` ikut disalin ke APK.
+
+### Diubah
+- Dokumentasi (README) mencatat `improve.css`, `improve.js`, `paper.css`, dan `paper.js`.
+
 ## [1.0.1] — 2026-10-15
 
 Perbaikan UI/UX berdasarkan pemeriksaan tampilan di mobile (390 px) dan desktop (1280 px).
