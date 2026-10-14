@@ -1,0 +1,283 @@
+/* =========================================================
+   FOCUSFLOW — PAPER.CSS  ·  Tema "Kertas 3D" (paper-cut)
+   Dimuat SETELAH improve.css. Hampir semua aturan hanya aktif
+   saat <html data-theme="paper">, jadi tema lain tidak berubah.
+   Palet: kertas putih-abu, matahari/pohon merah, tinta hitam.
+   Kedalaman: lembar bertumpuk (box-shadow berlapis), bukan blur.
+   ========================================================= */
+
+/* ---------- 00. PEMILIH TEMA DI PENGATURAN (semua tema) ---------- */
+.theme-swatches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.theme-swatch{display:grid;gap:8px;padding:8px;border-radius:16px;border:1.5px solid var(--line);background:var(--surface-solid);color:var(--text);text-align:left;min-height:44px;transition:border-color .2s var(--ease),box-shadow .2s var(--ease)}
+.theme-swatch b{font-size:12px;font-weight:800;padding:0 2px 2px}
+.theme-swatch[aria-checked="true"]{border-color:var(--primary-1);box-shadow:0 0 0 3px rgba(128,128,128,.2)}
+.theme-swatch .sw{display:block;height:54px;border-radius:11px;position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.08)}
+.sw-system{background:linear-gradient(135deg,#F6F3EE 0 50%,#101412 50% 100%)}
+.sw-terang{background:#F6F3EE}
+.sw-terang::after,.sw-gelap::after{content:"";position:absolute;left:10px;bottom:10px;width:46px;height:10px;border-radius:9px;background:#0F5A43}
+.sw-gelap{background:#101412}
+.sw-gelap::after{background:#3DB57F}
+.sw-kertas{background:linear-gradient(180deg,#F2F3F6,#DADDE3)}
+.sw-kertas::before{content:"";position:absolute;left:56%;top:7px;width:30px;height:30px;border-radius:50%;background:#D01F2A;box-shadow:0 3px 0 rgba(120,10,20,.25)}
+.sw-kertas::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-16px;height:36px;border-radius:50% 50% 0 0;background:#fff;box-shadow:0 -3px 0 #DCDFE5}
+
+/* ---------- 01. LATAR DIORAMA (hanya tema kertas) ---------- */
+#paperScene{display:none}
+html[data-theme="paper"] #paperScene{display:block;position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#paperSky,#paperLand{position:absolute;left:0;width:100%;display:block;will-change:transform}
+#paperSky{top:0;height:clamp(300px,50vh,520px);transform:translate3d(0,calc(var(--py,0)*-.10px),0)}
+#paperLand{bottom:0;height:clamp(190px,34vh,360px);transform:translate3d(0,calc(var(--py,0)*.04px),0)}
+@keyframes pDrift{0%,100%{transform:translateX(0)}50%{transform:translateX(16px)}}
+#paperSky .drift-a{animation:pDrift 19s ease-in-out infinite}
+#paperSky .drift-b{animation:pDrift 26s ease-in-out infinite reverse}
+html[data-theme="paper"] .app-shell{position:relative;z-index:1}
+html[data-theme="paper"] body{background:linear-gradient(180deg,#F3F4F7 0%,#E8EAEE 48%,#DBDEE4 100%)}
+@media (prefers-reduced-motion:reduce){
+  #paperSky,#paperLand{transform:none!important}
+  #paperSky .drift-a,#paperSky .drift-b{animation:none}
+}
+
+/* ---------- 02. TOKEN ---------- */
+html[data-theme="paper"]{
+  color-scheme:light;
+  --bg:#E8EAEE;
+  --surface:#FCFCFD;
+  --surface-solid:#FFFFFF;
+  --text:#202126;
+  --muted:#636671;
+  --line:rgba(32,33,38,.11);
+  --primary-1:#D01F2A;
+  --primary-2:#9E1019;
+  --primary:#D01F2A;
+  --primary-soft:#FCE8E9;
+  --on-soft:#A10F18;
+  --accent-1:#5A5D68;
+  --accent-2:#34363E;
+  --accent:#D01F2A;
+  --accent-soft:#ECEDF0;
+  --on-warm:#3A3C44;
+  --cream:#F3F4F6;
+  --success:#2A2B31;
+  --danger:#A3121B;
+  --hero-accent:#C3141E;
+  --ring-focus:#202126;
+  --radius:22px;
+  --radius-sm:15px;
+  --paper-serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Noto Serif",serif;
+  --edge-1:#EEF0F3;
+  --edge-2:#DDE0E6;
+  --shadow:0 1px 0 #fff inset,0 3px 0 -1px var(--edge-1),0 6px 0 -2px var(--edge-2),0 18px 26px -12px rgba(36,40,58,.30);
+  --shadow-soft:0 8px 22px -10px rgba(36,40,58,.28);
+  --shadow-red:0 1px 0 rgba(255,255,255,.25) inset,0 3px 0 -1px #B3121C,0 6px 0 -2px #85090F,0 18px 26px -12px rgba(140,10,20,.55);
+  --shadow-ink:0 1px 0 rgba(255,255,255,.18) inset,0 3px 0 -1px #2A2B31,0 6px 0 -2px #16171B,0 18px 26px -12px rgba(20,22,30,.55);
+  --shadow-gray:0 1px 0 #fff inset,0 3px 0 -1px #C9CCD3,0 6px 0 -2px #AEB2BB,0 18px 26px -12px rgba(36,40,58,.32);
+}
+html[data-theme="paper"] ::selection{background:rgba(208,31,42,.18)}
+
+/* ---------- 03. TIPOGRAFI ---------- */
+html[data-theme="paper"] .display,
+html[data-theme="paper"] .brand>span:last-child{font-family:var(--paper-serif)}
+html[data-theme="paper"] .display{font-weight:700;letter-spacing:-.035em}
+html[data-theme="paper"] .eyebrow{color:var(--primary-1)}
+
+/* ---------- 04. KARTU = LEMBAR KERTAS BERTUMPUK ---------- */
+html[data-theme="paper"] .bento-card{
+  background:linear-gradient(180deg,#FFFFFF,#FAFAFC);
+  border:1px solid rgba(32,33,38,.06);
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+  box-shadow:var(--shadow)
+}
+html[data-theme="paper"] .bento-card.glass{background:linear-gradient(180deg,#FFFFFF,#FAFAFC)}
+html[data-theme="paper"] .bento-card.cream{background:linear-gradient(180deg,#F7F7F9,#F0F1F4)}
+html[data-theme="paper"] .bento-card:hover{box-shadow:var(--shadow)}
+html[data-theme="paper"] .bento-card.emerald{
+  background:linear-gradient(150deg,#E3262F 0%,#C41822 58%,#A30F19 100%);
+  border-color:rgba(255,255,255,.18);color:#fff;box-shadow:var(--shadow-red)
+}
+html[data-theme="paper"] .bento-card.emerald:hover{box-shadow:var(--shadow-red)}
+html[data-theme="paper"] .bento-card.amber{
+  background:linear-gradient(160deg,#F2F3F6,#DDE0E6);
+  border-color:rgba(255,255,255,.7);color:#202126;box-shadow:var(--shadow-gray)
+}
+html[data-theme="paper"] .bento-card.amber:hover{box-shadow:var(--shadow-gray)}
+html[data-theme="paper"] .emerald .card-subtitle{color:rgba(255,255,255,.9)}
+html[data-theme="paper"] .amber .card-subtitle{color:rgba(32,33,38,.72)}
+html[data-theme="paper"] .decor-leaf,
+html[data-theme="paper"] .hero .decor-ball{display:none}
+html[data-theme="paper"] .decor-ball{opacity:.14}
+@media (hover:none){
+  html[data-theme="paper"] .bento-card:hover{box-shadow:var(--shadow)}
+  html[data-theme="paper"] .bento-card.emerald:hover{box-shadow:var(--shadow-red)}
+  html[data-theme="paper"] .bento-card.amber:hover{box-shadow:var(--shadow-gray)}
+}
+@media (max-width:699px){html[data-theme="paper"] .bento-card{border-radius:22px}}
+
+/* Baris di dalam kartu = lembar kecil yang menempel */
+html[data-theme="paper"] .task-row,
+html[data-theme="paper"] .tm-row,
+html[data-theme="paper"] .habit-card,
+html[data-theme="paper"] .goal-card,
+html[data-theme="paper"] .ivy-item,
+html[data-theme="paper"] .kr-item,
+html[data-theme="paper"] .insight-item,
+html[data-theme="paper"] .review-item,
+html[data-theme="paper"] .interruption-row,
+html[data-theme="paper"] .recipe-item,
+html[data-theme="paper"] .habit-stat{
+  background:#F5F6F8;border:1px solid rgba(32,33,38,.06);box-shadow:0 2px 0 #E6E8EC
+}
+html[data-theme="paper"] .task-row:has(.task-check.done),
+html[data-theme="paper"] .tm-row:has(.tm-check.done){background:#EEEFF2}
+html[data-theme="paper"] .tm-row:hover,
+html[data-theme="paper"] .habit-card:hover,
+html[data-theme="paper"] .goal-card:hover{border-color:rgba(208,31,42,.32)}
+html[data-theme="paper"] .quad,
+html[data-theme="paper"] .kan-col{background:#F1F2F5;border:1px dashed rgba(32,33,38,.16)}
+html[data-theme="paper"] .drop-task{box-shadow:0 2px 0 #DDE0E6}
+
+/* ---------- 05. TOMBOL: TIMBUL, TERTEKAN SAAT DISENTUH ---------- */
+html[data-theme="paper"] .pill-btn{
+  background:#fff;border:1px solid rgba(32,33,38,.10);
+  box-shadow:0 2px 0 #D5D8DE,0 6px 10px -4px rgba(36,40,58,.22)
+}
+html[data-theme="paper"] .pill-btn.ghost{background:transparent;box-shadow:none;border-color:transparent}
+html[data-theme="paper"] .pill-btn.primary{
+  background:linear-gradient(180deg,#E4252F,#C81822);color:#fff;border-color:transparent;
+  box-shadow:0 3px 0 #8E0D15,0 8px 14px -6px rgba(158,16,25,.55)
+}
+html[data-theme="paper"] .pill-btn.amber{
+  background:linear-gradient(180deg,#4A4C55,#2E3037);color:#fff;border-color:transparent;
+  box-shadow:0 3px 0 #16171B,0 8px 14px -6px rgba(20,22,30,.5)
+}
+html[data-theme="paper"] .pill-btn.danger{background:#fff;color:var(--danger);box-shadow:0 2px 0 #E7C9CB}
+html[data-theme="paper"] .pill-btn:active,
+html[data-theme="paper"] .nav-item:active{transform:translateY(2px);filter:none}
+html[data-theme="paper"] .pill-btn:active{box-shadow:0 0 0 #D5D8DE,0 2px 4px -2px rgba(36,40,58,.25)}
+html[data-theme="paper"] .pill-btn.primary:active{box-shadow:0 1px 0 #8E0D15}
+html[data-theme="paper"] .pill-btn.amber:active{box-shadow:0 1px 0 #16171B}
+html[data-theme="paper"] .pill-btn.ghost:active{box-shadow:none}
+html[data-theme="paper"] .pill-btn.primary:hover{filter:brightness(1.06)}
+html[data-theme="paper"] .quick-actions .pill-btn:not(.primary){background:#fff}
+@media (hover:none){html[data-theme="paper"] .pill-btn:hover{box-shadow:0 2px 0 #D5D8DE,0 6px 10px -4px rgba(36,40,58,.22)}}
+
+/* Tombol di atas kartu merah */
+html[data-theme="paper"] .bento-card.emerald .pill-btn{
+  background:#fff;color:#A10F18;border-color:transparent;
+  box-shadow:0 2px 0 rgba(90,6,12,.55),0 6px 10px -4px rgba(90,6,12,.5)
+}
+html[data-theme="paper"] .bento-card.emerald .pill-btn.ghost{
+  background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.45);box-shadow:none
+}
+html[data-theme="paper"] .primary-light{color:#A10F18!important}
+html[data-theme="paper"] .bento-card.emerald :focus-visible{outline-color:#fff}
+/* Tombol di atas kartu abu */
+html[data-theme="paper"] .bento-card.amber .pill-btn{background:#fff;color:#202126;border-color:transparent}
+html[data-theme="paper"] .bento-card.amber .pill-btn.ghost{background:transparent;box-shadow:none;border:1px solid rgba(32,33,38,.24)}
+html[data-theme="paper"] .bento-card.amber .pill-btn.primary{background:linear-gradient(180deg,#E4252F,#C81822);color:#fff}
+html[data-theme="paper"] .bento-card.amber .pill-btn.amber{background:linear-gradient(180deg,#4A4C55,#2E3037);color:#fff}
+html[data-theme="paper"] .bento-card.amber .ambient-btn:not(.active){background:rgba(255,255,255,.8);color:#202126;border-color:rgba(32,33,38,.12)}
+html[data-theme="paper"] .bento-card.amber .ambient-btn.active,
+html[data-theme="paper"] .ambient-btn.active{background:#202126;color:#fff}
+html[data-theme="paper"] #ambientVolume{accent-color:#202126}
+
+/* ---------- 06. NAVIGASI ---------- */
+html[data-theme="paper"] .pill-nav{
+  background:rgba(255,255,255,.97);border:1px solid rgba(32,33,38,.06);
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+  box-shadow:0 1px 0 #fff inset,0 3px 0 -1px var(--edge-2),0 14px 30px -8px rgba(36,40,58,.38)
+}
+html[data-theme="paper"] .nav-item.active{
+  background:linear-gradient(180deg,#E4252F,#C81822);color:#fff;
+  box-shadow:0 3px 0 #8E0D15,0 8px 14px -6px rgba(158,16,25,.5)
+}
+html[data-theme="paper"] .brand-mark{
+  background:linear-gradient(145deg,#E4252F,#B3121C);border-radius:13px;
+  box-shadow:0 3px 0 #8E0D15,0 8px 16px -6px rgba(158,16,25,.5)
+}
+html[data-theme="paper"] .brand-mark svg path[stroke]{stroke:#A10F18}
+html[data-theme="paper"] .avatar{background:#fff;color:#A10F18;border:1px solid rgba(32,33,38,.10);box-shadow:0 2px 0 #D5D8DE}
+
+/* ---------- 07. CHIP, TAB, KONTROL ---------- */
+html[data-theme="paper"] .chip{background:var(--primary-soft);color:var(--on-soft);box-shadow:0 1px 0 rgba(160,15,24,.16)}
+html[data-theme="paper"] .chip.amber{background:var(--accent-soft);color:var(--on-warm);box-shadow:0 1px 0 rgba(32,33,38,.12)}
+html[data-theme="paper"] .task-tab{background:#fff;box-shadow:0 2px 0 #D9DCE2}
+html[data-theme="paper"] .task-tab.active{background:linear-gradient(180deg,#E4252F,#C81822);box-shadow:0 3px 0 #8E0D15}
+html[data-theme="paper"] .mode-btn,
+html[data-theme="paper"] .ambient-btn,
+html[data-theme="paper"] .day-choice,
+html[data-theme="paper"] .habit-check-btn,
+html[data-theme="paper"] .wizard-type button{background:#fff;box-shadow:0 2px 0 #DDE0E6}
+html[data-theme="paper"] .mode-btn.active{border-color:rgba(208,31,42,.5);background:var(--primary-soft);box-shadow:0 2px 0 rgba(208,31,42,.25)}
+html[data-theme="paper"] .day-choice.selected{border-color:rgba(208,31,42,.35)}
+html[data-theme="paper"] .nav-item.active+.nav-item{box-shadow:none}
+html[data-theme="paper"] .habit-check-btn.skip{background:#fff;box-shadow:0 2px 0 #E7C9CB}
+html[data-theme="paper"] .field input,
+html[data-theme="paper"] .field select,
+html[data-theme="paper"] .field textarea,
+html[data-theme="paper"] .task-search,
+html[data-theme="paper"] .filter-select,
+html[data-theme="paper"] .focus-select,
+html[data-theme="paper"] .kr-controls input{
+  background:#F6F7F9;border:1px solid rgba(32,33,38,.14);box-shadow:inset 0 2px 3px rgba(36,40,58,.08)
+}
+html[data-theme="paper"] .field input:focus,
+html[data-theme="paper"] .field select:focus,
+html[data-theme="paper"] .field textarea:focus,
+html[data-theme="paper"] .task-search:focus,
+html[data-theme="paper"] .filter-select:focus,
+html[data-theme="paper"] .focus-select:focus{border-color:var(--primary-1);box-shadow:0 0 0 4px rgba(208,31,42,.16)}
+html[data-theme="paper"] .toggle{background:#B9BCC5}
+html[data-theme="paper"] .toggle.on{background:var(--primary-1)}
+html[data-theme="paper"] .focus-current-task{background:var(--primary-soft);color:var(--on-soft)}
+
+/* ---------- 08. VISUAL DATA (hijau → merah/tinta) ---------- */
+html[data-theme="paper"] .progress-fill{background:linear-gradient(90deg,#E4252F,#B3121C)}
+html[data-theme="paper"] #focusArea stop{stop-color:#D01F2A}
+html[data-theme="paper"] .chart-dot{stroke:#D01F2A}
+html[data-theme="paper"] .day-dot i{background:rgba(32,33,38,.07);border:1px solid rgba(32,33,38,.08)}
+html[data-theme="paper"] .day-dot.done i{background:#D01F2A;border-color:#B3121C;box-shadow:0 2px 0 #8E0D15}
+html[data-theme="paper"] .heat-cell{background:rgba(208,31,42,.08);border-color:rgba(208,31,42,.06)}
+html[data-theme="paper"] .heat-cell.l1{background:rgba(208,31,42,.25)}
+html[data-theme="paper"] .heat-cell.l2{background:rgba(208,31,42,.46)}
+html[data-theme="paper"] .heat-cell.l3{background:rgba(208,31,42,.68)}
+html[data-theme="paper"] .heat-cell.l4{background:#D01F2A;box-shadow:0 2px 7px rgba(208,31,42,.28)}
+html[data-theme="paper"] .streak-banner{background:linear-gradient(135deg,var(--primary-soft),rgba(208,31,42,.05));border-color:rgba(208,31,42,.16)}
+html[data-theme="paper"] .badge-item.earned{background:var(--primary-soft)}
+html[data-theme="paper"] .ring-bg{stroke:rgba(32,33,38,.10)}
+html[data-theme="paper"] .emerald .ring-bg{stroke:rgba(255,255,255,.2)}
+html[data-theme="paper"] .emerald .ring-value{stroke:#FFE3E5}
+
+/* ---------- 09. TIMER FOKUS = MATAHARI MERAH ---------- */
+html[data-theme="paper"] .focus-center .ring-bg{stroke:rgba(255,255,255,.2)}
+html[data-theme="paper"] .focus-center .ring-value{stroke:#FFE3E5}
+html[data-theme="paper"] #page-fokus[data-running="1"] .focus-time{text-shadow:0 0 28px rgba(255,214,218,.4)}
+html[data-theme="paper"] #page-fokus[data-running="1"] .focus-center .ring-value{filter:drop-shadow(0 0 8px rgba(255,214,218,.55))}
+html[data-theme="paper"] #page-fokus[data-phase="short"] .focus-main-card{background:linear-gradient(150deg,#3C3D45,#1C1D22);box-shadow:var(--shadow-ink)}
+html[data-theme="paper"] #page-fokus[data-phase="long"] .focus-main-card{background:linear-gradient(150deg,#666A76,#363841);box-shadow:var(--shadow-gray)}
+html[data-theme="paper"] #page-fokus[data-phase="short"] .primary-light{color:#202126!important}
+html[data-theme="paper"] #page-fokus[data-phase="long"] .primary-light{color:#202126!important}
+html[data-theme="paper"] .muted-light{color:rgba(255,255,255,.84)}
+html[data-theme="paper"] .focus-cycle{color:rgba(255,255,255,.88)}
+html[data-theme="paper"] .focus-center .timer-mode{color:rgba(255,255,255,.88);opacity:1}
+html[data-theme="paper"] .focus-main-card>*:not(.paper-diorama):not(.decor-ball){position:relative;z-index:1}
+
+/* ---------- 10. DIORAMA DI DALAM KARTU ---------- */
+.paper-diorama{display:none}
+html[data-theme="paper"] .paper-diorama{display:block;position:absolute;pointer-events:none;z-index:0}
+html[data-theme="paper"] .paper-diorama svg{display:block;width:100%;height:100%}
+html[data-theme="paper"] .hero .paper-diorama{right:0;bottom:0;width:100%;height:46%;
+  -webkit-mask-image:linear-gradient(0deg,#000 55%,transparent);mask-image:linear-gradient(0deg,#000 55%,transparent)}
+html[data-theme="paper"] .hero .hero-copy,
+html[data-theme="paper"] .hero .quick-actions{position:relative;z-index:2}
+html[data-theme="paper"] .focus-main-card .paper-diorama{left:0;right:0;bottom:0;height:36%}
+@media (min-width:700px){
+  html[data-theme="paper"] .hero .paper-diorama{width:62%;height:100%;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 40%);mask-image:linear-gradient(90deg,transparent 0,#000 40%)}
+}
+
+/* ---------- 11. MODAL & TOAST ---------- */
+html[data-theme="paper"] .modal{background:#FCFCFD;box-shadow:0 -12px 44px rgba(20,22,32,.30)}
+html[data-theme="paper"] .modal-head{background:#FCFCFD}
+html[data-theme="paper"] .modal-actions{background:linear-gradient(180deg,transparent,#FCFCFD 24%)}
+html[data-theme="paper"] .toast{background:#202126;box-shadow:0 3px 0 #0E0F12,0 14px 30px rgba(20,22,32,.35)}
+html[data-theme="paper"] .celebration-card{box-shadow:var(--shadow)}
