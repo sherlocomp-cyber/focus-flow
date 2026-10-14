@@ -1,0 +1,8 @@
+{
+  "appId": "com.sherlocomp.focusflow",
+  "appName": "FocusFlow",
+  "webDir": "www",
+  "backgroundColor": "#F6F3EE",
+  "server": { "androidScheme": "https" },
+  "android": { "allowMixedContent": false }
+}
