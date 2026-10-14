@@ -93,12 +93,24 @@ html[data-theme="dark"] .goal-card:hover{border-color:rgba(61,181,127,.4)}
   border:1.5px dashed var(--line);border-radius:var(--radius-sm);padding:22px 18px;
   font-size:14px;line-height:1.6
 }
+.empty-cta .empty-emoji{font-size:32px;line-height:1;margin-bottom:6px}
+.empty-cta p{margin:4px 0 14px;font-size:13px}
+.empty-cta strong{color:var(--text)}
 
 /* Ambient di kartu amber: kontras konsisten di terang & gelap */
 .bento-card.amber .ambient-btn:not(.active){background:rgba(255,255,255,.55);color:#2D1A08;border-color:rgba(45,26,8,.12)}
 .bento-card.amber .ambient-btn.active{background:#2D1A08;color:#fff}
 
-/* ---------- 06. NAVIGASI ---------- */
+/* Tombol hapus tugas */
+[data-task-del]{color:var(--danger)}
+[data-task-del]:hover{background:rgba(217,83,79,.1)}
+
+/* ---------- 06. TIMER FOKUS: WARNA PER FASE ---------- */
+#page-fokus[data-phase="short"] .focus-main-card{background:linear-gradient(145deg,#1F7A73,#124B47)}
+#page-fokus[data-phase="long"] .focus-main-card{background:linear-gradient(145deg,#3E6B8A,#223F57)}
+#page-fokus[data-running="1"] .focus-time{text-shadow:0 0 28px rgba(215,240,228,.28)}
+
+/* ---------- 07. NAVIGASI ---------- */
 /* Tab tugas: ganti teks "Geser →" dengan fade tepi yang lebih bersih */
 .task-tabs::after{display:none}
 .task-tabs{
@@ -118,17 +130,30 @@ html[data-theme="dark"] .goal-card:hover{border-color:rgba(61,181,127,.4)}
   .topbar{padding-top:calc(12px + env(safe-area-inset-top,0px))}
 }
 
-/* ---------- 07. MODAL / SHEET ---------- */
+/* ---------- 08. MODAL / SHEET ---------- */
+.modal{transition:transform .22s var(--ease)}
 @media (max-width:699px){
   .modal::before{
     content:"";flex:0 0 auto;width:42px;height:4px;border-radius:4px;
     background:rgba(128,128,128,.38);margin:-6px auto 12px
   }
+  .modal-head{touch-action:pan-y}
 }
 .modal-backdrop{backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
-.toast{font-weight:600;line-height:1.4}
 
-/* ---------- 08. INTERAKSI SENTUH ---------- */
+/* ---------- 09. TOAST + TOMBOL URUNGKAN ---------- */
+.toast{font-weight:600;line-height:1.4}
+.toast.has-action{display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left}
+.toast.has-action.show{pointer-events:auto}
+.toast-action{
+  flex:0 0 auto;min-width:0;min-height:40px;padding:8px 16px;border-radius:999px;
+  background:rgba(255,255,255,.16);color:#fff;font-weight:800;font-size:13px;
+  -webkit-tap-highlight-color:transparent
+}
+.toast-action:hover{background:rgba(255,255,255,.26)}
+.toast-action:focus-visible{outline-color:#fff}
+
+/* ---------- 10. INTERAKSI SENTUH ---------- */
 @media (hover:none){
   .bento-card:hover,.pill-btn:hover,.habit-check-btn:hover{transform:none;box-shadow:var(--shadow)}
   .pill-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.04)}
