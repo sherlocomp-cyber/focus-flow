@@ -1,7 +1,7 @@
 # FocusFlow
 
-Aplikasi **goal, kebiasaan (habit), tugas, dan timer fokus Pomodoro** dalam satu file HTML.
-Berjalan sepenuhnya di browser, bisa dipakai offline, dan datanya tersimpan di perangkatmu (tanpa server, tanpa akun).
+Aplikasi **goal, kebiasaan (habit), tugas, dan timer fokus Pomodoro**.
+Berjalan sepenuhnya di browser tanpa build, bisa dipakai offline, dan datanya tersimpan di perangkatmu (tanpa server, tanpa akun).
 
 ## Fitur
 
@@ -16,8 +16,10 @@ Berjalan sepenuhnya di browser, bisa dipakai offline, dan datanya tersimpan di p
 
 ## Cara memakai
 
-1. Buka `index.html` di browser, atau pakai lewat GitHub Pages (lihat di bawah).
+1. Buka lewat GitHub Pages (lihat di bawah) atau jalankan server statis lokal, misalnya `python3 -m http.server`, lalu buka `http://localhost:8000`.
 2. Di ponsel, pilih **Tambahkan ke layar utama** supaya terpasang seperti aplikasi.
+
+Membuka `index.html` langsung dari berkas (`file://`) juga berjalan, tetapi mode offline (service worker) hanya aktif lewat `http(s)`.
 
 ### GitHub Pages
 
@@ -38,14 +40,21 @@ Aplikasi tersedia di `https://<username>.github.io/focus-flow/`.
 
 | File | Fungsi |
 | --- | --- |
-| `index.html` | Seluruh aplikasi (HTML, CSS, JS) |
+| `index.html` | Kerangka halaman |
+| `styles.css` | Seluruh gaya |
+| `core.js` | Data layer, logika, komponen UI, modal, insight, pengaturan |
+| `goals-tasks.js` | Modul goal dan tugas |
+| `habits-focus.js` | Modul habit dan mesin fokus (timer, audio, notifikasi) |
+| `init.js` | Inisialisasi, aksesibilitas modal, registrasi service worker |
 | `manifest.webmanifest`, `icon.svg` | Metadata PWA dan ikon |
 | `sw.js` | Service worker untuk mode offline |
 | `CHANGELOG.md` | Riwayat versi |
 
+File JS adalah skrip klasik yang berbagi lingkup global, jadi urutan pemuatan di `index.html` harus dipertahankan.
+
 ## Pengembangan
 
-Tidak ada proses build. Edit `index.html`, lalu naikkan `APP_VERSION` di skrip dan `CACHE` di `sw.js` setiap rilis agar pengguna menerima pembaruan.
+Tidak ada proses build. Setiap rilis: naikkan `APP_VERSION` di `core.js` dan `CACHE` di `sw.js` agar pengguna menerima pembaruan.
 
 ## Lisensi
 
