@@ -142,6 +142,7 @@ window.renderFocusUI=function(){
   if(pg){pg.dataset.phase=focusState.phase;pg.dataset.running=focusState.running?"1":"0"}
   const title=focusState.running?`${$("#focusTimer").textContent} · ${focusState.phase==="focus"?"Fokus":"Istirahat"} — FocusFlow`:BASE_TITLE;
   if(document.title!==title)document.title=title;
+  syncWakeLock();
 };
 const _playBell=window.playBell;
 window.playBell=function(){
@@ -224,8 +225,51 @@ document.addEventListener("visibilitychange",()=>{
   if(isoDay(new Date())!==bootDay&&!focusState.running&&!document.body.classList.contains("modal-open"))location.reload();
 });
 
-/* ---------- 10. INISIALISASI ---------- */
-const ver=$("#appVersion");if(ver)ver.textContent="v1.1.0";
+/* ---------- 10. LAYAR TETAP MENYALA SAAT TIMER BERJALAN ---------- */
+let wakeLock=null,wakePending=false;
+async function syncWakeLock(){
+  try{
+    if(!("wakeLock" in navigator)||wakePending)return;
+    const need=!!focusState.running&&document.visibilityState==="visible";
+    if(need&&!wakeLock){
+      wakePending=true;
+      wakeLock=await navigator.wakeLock.request("screen");
+      wakeLock.addEventListener("release",()=>{wakeLock=null});
+    }else if(!need&&wakeLock){
+      const w=wakeLock;wakeLock=null;await w.release();
+    }
+  }catch(e){wakeLock=null}
+  finally{wakePending=false}
+}
+document.addEventListener("visibilitychange",syncWakeLock);
+
+/* ---------- 11. HALAMAN BARU SELALU MULAI DARI ATAS ---------- */
+try{
+  const mo=new MutationObserver(list=>{
+    for(const m of list){
+      if(m.target.classList.contains("active")&&!(m.oldValue||"").split(/\s+/).includes("active")){
+        window.scrollTo({top:0,behavior:"instant"});break;
+      }
+    }
+  });
+  document.querySelectorAll(".page").forEach(p=>mo.observe(p,{attributes:true,attributeFilter:["class"],attributeOldValue:true}));
+}catch(e){}
+
+/* ---------- 12. PINTASAN KEYBOARD (desktop): Spasi = mulai/jeda timer, N = tugas baru ---------- */
+const startBtn=$("#focusStart");
+if(startBtn)startBtn.title="Pintasan keyboard: Spasi";
+document.addEventListener("keydown",e=>{
+  if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;
+  const t=e.target;
+  if(t&&t.closest&&t.closest("input,textarea,select,button,a,[contenteditable],[role=button]"))return;
+  if(document.body.classList.contains("modal-open"))return;
+  const pg=$("#page-fokus");
+  if(e.code==="Space"&&pg&&pg.classList.contains("active")&&startBtn){e.preventDefault();startBtn.click()}
+  else if((e.key==="n"||e.key==="N")&&typeof openTaskModal==="function"){e.preventDefault();openTaskModal()}
+});
+
+/* ---------- 13. INISIALISASI ---------- */
+const ver=$("#appVersion");if(ver)ver.textContent="v1.2.0";
 applyTheme();
 renderHome();
 renderFocusUI();
