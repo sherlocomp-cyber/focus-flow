@@ -1,7 +1,7 @@
 /* =========================================================
    01. DATA LAYER — localStorage aman + seed realistis
    ========================================================= */
-const APP_VERSION="1.0.0",SCHEMA_VERSION=1;
+const APP_VERSION="1.0.1",SCHEMA_VERSION=1;
 const STORAGE_KEYS={
   goals:"ff:goals",habits:"ff:habits",habitLogs:"ff:habitLogs",tasks:"ff:tasks",
   projects:"ff:projects",sessions:"ff:sessions",profile:"ff:profile",
@@ -288,7 +288,7 @@ function renderHome(){
   $("#streakNumber").textContent=bestStreak();
   const activeHabits=DB.habits.filter(h=>!h.archived);
   $("#habitRate").textContent=(activeHabits.length?Math.round(activeHabits.reduce((a,h)=>a+habitRate(h),0)/activeHabits.length):0)+"%";
-  $("#weekDots").innerHTML=weekHabitDays().map(x=>`<div class="day-dot ${x.done?"done":""} ${isoDay(x.d)===isoDay(now)?"today":""}"><i></i>${new Intl.DateTimeFormat("id-ID",{weekday:"short"}).format(x.d).slice(0,2)}</div>`).join("");
+  $("#weekDots").innerHTML=weekHabitDays().map(x=>`<div class="day-dot ${x.done?"done":""} ${isoDay(x.d)===isoDay(now)?"today":""}"><i></i>${new Intl.DateTimeFormat("id-ID",{weekday:"short"}).format(x.d).slice(0,3)}</div>`).join("");
 
   const vals=focusByDay();
   $("#focusChart").innerHTML=focusChartSVG();
