@@ -1,0 +1,77 @@
+/* =========================================================
+   FocusFlow — perbaikan UI/UX (v1.0.1)
+   Dimuat setelah styles.css; hanya berisi koreksi dan penyempurnaan.
+   ========================================================= */
+
+/* 1. Atribut hidden harus selalu menang (banner dulu tampil terus) */
+[hidden]{display:none!important}
+
+/* 2. Tombol info: tampilan kecil, area sentuh tetap 44px */
+.info{
+  width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;
+  margin:0 0 0 6px!important;font-size:11px;line-height:1;position:relative;vertical-align:middle;
+  display:inline-grid;place-items:center;
+}
+.info::after{content:"";position:absolute;inset:-12px}
+.mode-btn .info{margin:0!important}
+
+/* 3. Kotak centang tugas: bulat, ringan, area sentuh tetap luas */
+.task-check,.tm-check{
+  width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;
+  border-radius:50%;position:relative;font-size:14px;
+}
+.task-check::after,.tm-check::after{content:"";position:absolute;inset:-8px}
+.task-check:hover,.tm-check:hover{border-color:var(--success)}
+
+/* 4. Chip tidak patah baris */
+.chip{white-space:nowrap;flex:none}
+
+/* 5. Tab tugas: pudar di tepi kanan sebagai petunjuk geser (menggantikan teks "Geser →") */
+.task-tabs::after{display:none!important}
+.task-tabs{
+  padding-right:28px;
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 30px),transparent);
+  mask-image:linear-gradient(90deg,#000 calc(100% - 30px),transparent);
+}
+
+/* 6. Dekorasi tidak mengganggu tombol */
+.decor-leaf{opacity:.12;z-index:0}
+.quick-actions{position:relative;z-index:2}
+
+/* 7. Tanpa efek hover menempel di layar sentuh */
+@media(hover:none){
+  .bento-card:hover{transform:none;box-shadow:var(--shadow)}
+  .pill-btn:hover,.habit-check-btn:hover{transform:none}
+}
+
+/* 8. Mobile */
+@media(max-width:699px){
+  .storage-banner,.backup-reminder{padding:12px 14px;border-radius:18px}
+  .task-search{flex:1 1 100%}
+  .tm-row{grid-template-columns:28px minmax(0,1fr)}
+  .card-head:has(>.pill-btn.icon){flex-wrap:nowrap}
+  .card-head:has(>.pill-btn.icon)>div{flex:1;min-width:0}
+
+  /* Kartu habit: ikon | nama | streak, lalu tombol status selebar kartu */
+  .habit-card{grid-template-columns:44px minmax(0,1fr) auto;gap:10px 12px;align-items:center}
+  .habit-card>div{display:contents}
+  .habit-icon{grid-column:1;grid-row:1}
+  .habit-card>button.ghost{grid-column:2;grid-row:1;min-width:0}
+  .habit-streak{grid-column:3;grid-row:1;align-self:center}
+  .habit-checks{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .habit-check-btn{width:100%;padding:8px 6px}
+}
+
+/* 9. Desktop: menu di tengah, tidak menimpa avatar */
+@media(min-width:1080px){
+  .topbar{padding-right:0}
+  .pill-nav.nav-top{left:50%;right:auto;transform:translateX(-50%);max-width:none}
+  .nav-top .nav-item{padding:0 13px}
+}
+@media(min-width:1080px) and (max-width:1279px){
+  .nav-top .nav-item:not(.active) span{display:none}
+  .nav-top .nav-item{padding:0 12px}
+}
+
+/* 10. Fokus keyboard yang jelas pada navigasi */
+.nav-item:focus-visible{outline:3px solid var(--accent-1);outline-offset:-3px}
