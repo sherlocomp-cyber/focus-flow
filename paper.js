@@ -142,7 +142,16 @@ function enhanceThemeSetting(){
 const _bindSettings=window.bindSettings;
 window.bindSettings=function(){_bindSettings.apply(this,arguments);try{enhanceThemeSetting()}catch(e){}};
 
-/* ---------- 05. INISIALISASI ---------- */
-const ver=$("#appVersion");if(ver)ver.textContent="v1.6.0";
+/* ---------- 05. TEMA BAWAAN ---------- */
+/* Pengguna baru dan "Reset data" mulai dari Kertas 3D (seedProfile dipakai resetData). */
+try{seedProfile.settings.theme=T}catch(e){}
+/* Aplikasi yang sudah terpasang dipindah ke Kertas 3D satu kali; setelah itu pilihan pengguna dihormati. */
+if(load("ff:themeDefault","")!=="1"){
+  save("ff:themeDefault","1");
+  DB.profile.settings.theme=T;saveDB();
+}
+
+/* ---------- 06. INISIALISASI ---------- */
+const ver=$("#appVersion");if(ver)ver.textContent="v1.6.1";
 applyTheme();
 })();
