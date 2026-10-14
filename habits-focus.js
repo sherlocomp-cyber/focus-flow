@@ -225,7 +225,7 @@ const FOCUS_MODES={
   flow:{focus:0,short:0,long:0,label:"FLOW"}
 };
 const focusState={
-  mode:"klasik",phase:"focus",running:false,targetAt:null,startedAt:null,
+  mode:"klasik",phase:"focus",running:false,targetAt:null,startedAt:null,flowRunFrom:null,
   remaining:25*60,elapsed:0,focusCount:0,cycleNo:1,taskId:"",
   interruption:[],interval:null,audioCtx:null,ambientNode:null,ambientGain:null
 };
@@ -241,19 +241,26 @@ function focusRingPercent(){
   return total?Math.max(0,Math.min(100,focusState.remaining/total*100)):0;
 }
 function syncFocusFromTimestamp(){
-  if(!focusState.running||!focusState.targetAt)return;
-  const left=Math.max(0,Math.ceil((focusState.targetAt-Date.now())/1000));
+  if(!focusState.running)return;
   if(focusState.mode==="flow"){
-    focusState.elapsed=Math.max(0,Math.floor((Date.now()-focusState.startedAt)/1000));
+    /* Mode Flow menghitung maju dari flowRunFrom (tidak memakai targetAt). */
+    if(!focusState.flowRunFrom)return;
+    focusState.elapsed=Math.max(0,Math.floor((Date.now()-focusState.flowRunFrom)/1000));
     focusState.remaining=0;
-  }else{
-    focusState.remaining=left;
-    if(left<=0)finishTimedPhase();
+    return;
   }
+  if(!focusState.targetAt)return;
+  const left=Math.max(0,Math.ceil((focusState.targetAt-Date.now())/1000));
+  focusState.remaining=left;
+  if(left<=0)finishTimedPhase();
 }
 function fmtTimer(sec){sec=Math.max(0,Math.floor(sec));return `${Math.floor(sec/60).toString().padStart(2,"0")}:${(sec%60).toString().padStart(2,"0")}`}
 function focusCurrentTask(){return taskById(focusState.taskId)}
 function renderFocusUI(){
+  /* Mode Flow tidak punya fase istirahat: kembalikan ke fokus bila timer sedang berhenti. */
+  if(focusState.mode==="flow"&&focusState.phase!=="focus"&&!focusState.running){
+    focusState.phase="focus";focusState.startedAt=null;focusState.elapsed=0;focusState.remaining=0;
+  }
   syncFocusFromTimestamp();
   const label=focusState.mode==="flow"?fmtTimer(focusState.elapsed):fmtTimer(focusState.remaining);
   $("#focusTimer").textContent=label;
@@ -270,16 +277,19 @@ function renderFocusUI(){
   $("#miniStart").textContent=focusState.running?"Jeda":"Mulai";
 }
 function resetFocusPhase(){
-  clearInterval(focusState.interval);focusState.interval=null;focusState.running=false;focusState.targetAt=null;focusState.startedAt=null;focusState.elapsed=0;
+  clearInterval(focusState.interval);focusState.interval=null;focusState.running=false;focusState.targetAt=null;focusState.startedAt=null;focusState.flowRunFrom=null;focusState.elapsed=0;
   focusState.remaining=focusDurationSeconds();renderFocusUI();
 }
 function startFocus(){
   if(focusState.running){
-    syncFocusFromTimestamp();focusState.running=false;clearInterval(focusState.interval);focusState.interval=null;focusState.targetAt=null;renderFocusUI();return;
+    syncFocusFromTimestamp();focusState.running=false;clearInterval(focusState.interval);focusState.interval=null;focusState.targetAt=null;focusState.flowRunFrom=null;renderFocusUI();return;
   }
+  if(focusState.mode==="flow"&&focusState.phase!=="focus")focusState.phase="focus";
   if(focusState.phase==="focus"&&!focusState.startedAt)focusState.startedAt=Date.now();
   if(focusState.mode==="flow"){
-    if(!focusState.startedAt)focusState.startedAt=Date.now()-focusState.elapsed*1000;
+    /* Lanjutkan hitung maju dari elapsed yang sudah ada (aman setelah jeda). */
+    focusState.targetAt=null;
+    focusState.flowRunFrom=Date.now()-(focusState.elapsed||0)*1000;
   }else{
     const dur=focusState.remaining||focusDurationSeconds();
     focusState.targetAt=Date.now()+dur*1000;
@@ -332,12 +342,12 @@ function skipPhase(){
 }
 function fullResetFocus(){
   clearInterval(focusState.interval);stopAmbient();
-  Object.assign(focusState,{running:false,targetAt:null,startedAt:null,remaining:focusDurationSeconds(),elapsed:0,focusCount:0,cycleNo:1,interruption:[]});
+  Object.assign(focusState,{running:false,targetAt:null,startedAt:null,flowRunFrom:null,remaining:focusDurationSeconds(),elapsed:0,focusCount:0,cycleNo:1,interruption:[]});
   renderFocusUI();renderInterruptions();
 }
 function selectMode(mode){
   if(focusState.running){toast("Jeda dulu sebelum mengganti mode.");return}
-  focusState.mode=mode;focusState.phase="focus";focusState.remaining=focusDurationSeconds();focusState.elapsed=0;focusState.startedAt=null;
+  focusState.mode=mode;focusState.phase="focus";focusState.remaining=focusDurationSeconds();focusState.elapsed=0;focusState.startedAt=null;focusState.flowRunFrom=null;
   $$(".mode-btn").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));
   renderFocusUI();
 }
