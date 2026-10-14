@@ -3,18 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#F6F3EE" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#101412" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F6F3EE">
 <title>FocusFlow — Goal, Habit & Task Manager</title>
 <meta name="description" content="FocusFlow: aplikasi goal, kebiasaan, tugas, dan timer fokus Pomodoro. Offline, data tersimpan di perangkatmu.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="improve.css">
-<link rel="stylesheet" href="paper.css">
+<link rel="stylesheet" href="ux.css">
 </head>
 <body>
-<a class="skip-link" href="#main">Lompat ke konten</a>
 <div class="app-shell">
   <header class="container topbar">
     <a class="brand" role="button" tabindex="0" data-route="beranda" aria-label="FocusFlow Beranda">
@@ -29,7 +26,7 @@
     </div>
   </header>
 
-  <main class="container app-main" id="main" tabindex="-1">
+  <main class="container app-main">
     <!-- BERANDA -->
     <section class="page active" id="page-beranda" data-page="beranda">
       <div id="storageBanner" class="storage-banner" hidden><div><strong>Penyimpanan browser diblokir.</strong><p>Data akan hilang saat ditutup. Ekspor cadangan secara berkala.</p></div><button class="pill-btn amber" id="storageExportBtn" type="button">Ekspor</button></div>
@@ -155,12 +152,12 @@
             <button class="ambient-btn" data-ambient="kafe">☕ Kafe</button>
             <button class="ambient-btn" data-ambient="putih">〰 White noise</button>
           </div>
-          <div class="between" style="margin-top:15px"><span style="font-size:12px;font-weight:800">Volume</span><input id="ambientVolume" type="range" min="0" max="1" step=".05" value=".6" style="width:130px" aria-label="Volume ambient"></div>
+          <div class="between" style="margin-top:15px"><span style="font-size:12px;font-weight:800">Volume</span><input id="ambientVolume" type="range" min="0" max="1" step=".05" value=".6" style="width:130px"></div>
         </article>
 
         <article class="bento-card cream">
           <div class="card-head"><div><h2 class="card-title">Pengaturan sesi</h2><p class="card-subtitle">Atur perilaku timer sesuai ritmemu.</p></div></div>
-          <div class="setting-row"><span>Auto-start berikutnya</span><button class="toggle" id="focusAutoStart" role="switch" aria-label="Auto-start berikutnya"><i></i></button></div>
+          <div class="setting-row"><span>Auto-start berikutnya</span><button class="toggle" id="focusAutoStart"><i></i></button></div>
           <div class="setting-row"><span>Istirahat panjang tiap 4 sesi</span><span class="chip">Aktif</span></div>
           <div class="setting-row"><span>Notifikasi browser</span><button class="pill-btn" id="notifyPermission">Aktifkan</button></div>
         </article>
@@ -230,7 +227,7 @@
           <div class="goal-toolbar"><span class="chip" id="goalActiveChip">0 aktif</span><span class="chip">SMART & OKR</span></div>
         </article>
         <article class="bento-card glass span-4"><div class="between"><div><h2 class="card-title">Tujuan aktif</h2><p class="card-subtitle">Progres dihitung dari hasil, milestone, task, dan habit yang ditautkan.</p></div></div><div id="goalList" class="goal-list"></div></article>
-        <article class="bento-card glass span-4"><div class="between"><div><h2 class="card-title">Roadmap</h2><p class="card-subtitle">Lihat urutan milestone sampai deadline.</p></div><button class="info" data-tip="Tujuan yang jelas dan terukur lebih mudah dicapai daripada niat yang samar." aria-label="Kenapa ini?">i</button></div><div id="goalRoadmap" class="goal-roadmap"></div></article>
+        <article class="bento-card glass span-4"><div class="between"><div><h2 class="card-title">Roadmap</h2><p class="card-subtitle">Lihat urutan milestone sampai deadline.</p></div><button class="info" data-tip="Tujuan yang jelas dan terukur lebih mudah dicapai daripada niat yang samar.">i</button></div><div id="goalRoadmap" class="goal-roadmap"></div></article>
         <article class="bento-card glass span-4"><div class="between"><div><h2 class="card-title">Review terpandu</h2><p class="card-subtitle">Berhenti sebentar untuk melihat apa yang berhasil dan apa yang perlu diubah.</p></div><div class="row"><button class="pill-btn" id="weeklyReviewBtn">Mingguan</button><button class="pill-btn" id="monthlyReviewBtn">Bulanan</button></div></div><div id="reviewPanel"></div></article>
       </div>
     </section>
@@ -250,10 +247,9 @@
     <section class="page" id="page-pengaturan" data-page="pengaturan">
 <div class="bento-grid">
 <article class="bento-card glass span-4"><div class="eyebrow">Pengaturan</div><h1 class="display">Atur FocusFlow sesuai caramu.</h1><p class="card-subtitle">Semua pengaturan disimpan di perangkat ini.</p></article>
-<article class="bento-card glass span-4"><h2 class="card-title">Nama panggilan</h2><p class="card-subtitle">Dipakai untuk sapaan di Beranda.</p><input id="settingsName" class="task-search" type="text" maxlength="30" placeholder="Teman" autocomplete="nickname" aria-label="Nama panggilan" style="width:100%;max-width:420px;margin-top:12px"></article>
-<article class="bento-card glass span-2"><h2 class="card-title">Tema</h2><select id="settingsTheme" class="filter-select" style="width:100%" aria-label="Tema"><option value="system">Sistem</option><option value="terang">Terang</option><option value="gelap">Gelap</option></select></article>
+<article class="bento-card glass span-2"><h2 class="card-title">Tema</h2><select id="settingsTheme" class="filter-select" style="width:100%"><option value="system">Sistem</option><option value="terang">Terang</option><option value="gelap">Gelap</option></select></article>
 <article class="bento-card glass span-2"><h2 class="card-title">Durasi timer</h2><div id="timerSettings" class="settings-stack"></div></article>
-<article class="bento-card glass span-2"><h2 class="card-title">Ambient</h2><select id="settingsAmbient" class="filter-select" style="width:100%" aria-label="Suara ambient"><option value="mati">Mati</option><option value="hujan">Hujan</option><option value="kafe">Kafe</option><option value="putih">White noise</option></select></article>
+<article class="bento-card glass span-2"><h2 class="card-title">Ambient</h2><select id="settingsAmbient" class="filter-select" style="width:100%"><option value="mati">Mati</option><option value="hujan">Hujan</option><option value="kafe">Kafe</option><option value="putih">White noise</option></select></article>
 <article class="bento-card glass span-2"><h2 class="card-title">Streak freeze</h2><div class="display" id="freezeCount">0</div><button class="pill-btn" id="useFreezeBtn">Gunakan 1 freeze</button></article>
 <article class="bento-card glass span-4"><h2 class="card-title">Data</h2><p class="card-subtitle">Cadangkan atau pindahkan data FocusFlow.</p><div class="row" style="flex-wrap:wrap"><button class="pill-btn primary" id="exportJsonBtn">Ekspor JSON</button><button class="pill-btn" id="importJsonBtn">Impor JSON</button><button class="pill-btn" id="exportCsvBtn">Ekspor CSV</button><input id="importJsonFile" type="file" accept=".json,application/json" hidden></div></article>
 <article class="bento-card glass span-4"><h2 class="card-title">Reset data</h2><p class="card-subtitle">Hapus semua data FocusFlow di perangkat ini. Ekspor cadangan dulu jika perlu.</p><button class="pill-btn danger" id="resetData">Reset data</button></article>
@@ -277,7 +273,5 @@
 <script src="goals-tasks.js"></script>
 <script src="habits-focus.js"></script>
 <script src="init.js"></script>
-<script src="improve.js"></script>
-<script src="paper.js"></script>
 </body>
 </html>
