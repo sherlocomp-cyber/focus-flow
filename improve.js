@@ -350,7 +350,7 @@ window.skipPhase=function(){
 const skipBtn=$("#focusSkip");
 if(skipBtn)skipBtn.onclick=()=>window.skipPhase();   /* init.js mengikat fungsi lama; ikat ulang */
 
-/* (b) Pilihan ikon habit di wizard (sebelumnya selalu 🌱 kecuali nama memuat "Baca"/"Jalan") */
+/* (b) Pilihan ikon habit: di wizard (langkah 1) dan di halaman detail untuk habit yang sudah ada */
 const HABIT_ICONS=["🌱","📖","🚶","💧","🏋️","🧘","✍️","🥗","😴","🎧","🧹","💻"];
 const _renderHabitWizard=window.renderHabitWizard;
 window.renderHabitWizard=function(){
@@ -379,10 +379,23 @@ function paintHabitIcons(){
   const di=$(".detail-icon"),sel=DB.habits.find(x=>x.id===selectedHabitId);
   if(di&&sel&&sel.icon)di.textContent=sel.icon;
 }
+/* Ganti ikon habit yang sudah ada (lipatan "Ganti ikon" di bawah judul detail) */
+function addHabitIconPicker(){
+  const head=document.querySelector("#habitDetail .detail-head");
+  const sel=DB.habits.find(x=>x.id===selectedHabitId&&!x.archived);
+  if(!head||!sel||$("#habitIconPicker"))return;
+  const cur=sel.icon||"";
+  const d=document.createElement("details");d.id="habitIconPicker";d.style.marginTop="12px";
+  d.innerHTML=`<summary class="muted" style="cursor:pointer;font-size:12px;font-weight:800">Ganti ikon</summary><div class="day-picker" role="radiogroup" aria-label="Ganti ikon habit" style="margin-top:8px">${HABIT_ICONS.map(i=>`<button type="button" class="day-choice ${i===cur?"selected":""}" data-hicon="${i}" role="radio" aria-checked="${i===cur}" aria-label="Ikon ${i}">${i}</button>`).join("")}</div>`;
+  head.insertAdjacentElement("afterend",d);
+  d.querySelectorAll("[data-hicon]").forEach(b=>b.onclick=()=>{
+    sel.icon=b.dataset.hicon;saveDB();renderHabits();toast("Ikon diperbarui.");
+  });
+}
 const _renderHabitList2=window.renderHabitList;
 window.renderHabitList=function(){_renderHabitList2.apply(this,arguments);try{paintHabitIcons()}catch(e){}};
 const _renderHabitDetail2=window.renderHabitDetail;
-window.renderHabitDetail=function(){_renderHabitDetail2.apply(this,arguments);try{paintHabitIcons()}catch(e){}};
+window.renderHabitDetail=function(){_renderHabitDetail2.apply(this,arguments);try{paintHabitIcons();addHabitIconPicker()}catch(e){}};
 
 /* (c) Habit "beberapa kali per minggu": persentase dihitung per minggu terhadap targetnya
        (sebelumnya per hari, sehingga target 3×/minggu mentok sekitar 43%),
@@ -414,7 +427,7 @@ window.habitStreak=function(h){
 };
 
 /* ---------- 16. INISIALISASI ---------- */
-const ver=$("#appVersion");if(ver)ver.textContent="v1.4.0";
+const ver=$("#appVersion");if(ver)ver.textContent="v1.4.1";
 applyTheme();
 renderHome();
 renderFocusUI();
