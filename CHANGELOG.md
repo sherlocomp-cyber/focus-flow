@@ -10,9 +10,14 @@ Rilis pertama di GitHub, hasil audit.
 - Teks pengguna yang belum di-escape (Key Results, Milestone, kapan/di mana habit) kini di-escape.
 - Impor goal minimal (tanpa `type`/`status`) tidak lagi membuat halaman Goal error.
 
+### Diubah
+- Satu file HTML dipecah menjadi `index.html`, `styles.css`, dan empat file JS (`core.js`, `goals-tasks.js`, `habits-focus.js`, `init.js`). Isi dan perilaku aplikasi sama; kode hanya dipindah.
+- Data awal netral (tanpa tugas/goal/habit contoh, nama "Teman"); sebelumnya berisi data demo.
+- Tombol reset kini mengembalikan aplikasi ke kondisi kosong, bukan ke data contoh.
+- Versi aplikasi dipindah ke Pengaturan → Tentang.
+
 ### Ditambahkan
-- Data awal netral (tanpa tugas/goal/habit contoh); sebelumnya berisi data demo.
 - Aksesibilitas modal: fokus masuk ke dialog, jebakan Tab, fokus dikembalikan saat ditutup; toast `aria-live`.
 - PWA: `manifest.webmanifest`, `icon.svg`, service worker offline, meta description.
-- Versi aplikasi di Pengaturan dan penanda versi skema data.
+- Penanda versi skema data.
 - README, LICENSE, `.gitignore`.
