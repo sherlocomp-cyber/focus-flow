@@ -322,11 +322,102 @@ if(modalBd)new MutationObserver(()=>{
   if(modalBd.classList.contains("open")&&document.fullscreenElement)document.exitFullscreen().catch(()=>{});
 }).observe(modalBd,{attributes:true,attributeFilter:["class"]});
 
-/* ---------- 15. INISIALISASI ---------- */
-const ver=$("#appVersion");if(ver)ver.textContent="v1.3.0";
+/* ---------- 15. PERBAIKAN LOGIKA: tombol Lewati, ikon habit, habit mingguan ---------- */
+/* (a) "Lewati" sebelumnya mencatat sesi fokus selesai walau baru berjalan beberapa detik,
+       dan melewati fase fokus yang belum dimulai tetap menambah hitungan 4 sesi.
+       Sekarang sesi baru dicatat jika sudah berjalan minimal MIN_SESI_MENIT. */
+const MIN_SESI_MENIT=5;
+window.skipPhase=function(){
+  if(focusState.running)syncFocusFromTimestamp();
+  const wasFocus=focusState.phase==="focus";
+  const spent=focusState.startedAt?Math.round((Date.now()-focusState.startedAt)/60000):0;
+  clearInterval(focusState.interval);focusState.interval=null;focusState.running=false;focusState.targetAt=null;stopAmbient();
+  let msg="";
+  if(wasFocus){
+    if(spent>=MIN_SESI_MENIT){
+      completeFocusSession();
+      focusState.focusCount++;focusState.cycleNo++;
+      focusState.phase=(focusState.focusCount%4===0)?"long":"short";
+    }else{
+      focusState.phase="short";
+      msg=spent>0?`Sesi baru ${spent} menit (kurang dari ${MIN_SESI_MENIT}), jadi tidak dicatat.`:"Langsung ke istirahat. Sesi ini tidak dihitung.";
+    }
+  }else focusState.phase="focus";
+  focusState.remaining=focusDurationSeconds();focusState.elapsed=0;focusState.startedAt=null;
+  renderFocusUI();
+  if(msg)toast(msg);
+};
+const skipBtn=$("#focusSkip");
+if(skipBtn)skipBtn.onclick=()=>window.skipPhase();   /* init.js mengikat fungsi lama; ikat ulang */
+
+/* (b) Pilihan ikon habit di wizard (sebelumnya selalu 🌱 kecuali nama memuat "Baca"/"Jalan") */
+const HABIT_ICONS=["🌱","📖","🚶","💧","🏋️","🧘","✍️","🥗","😴","🎧","🧹","💻"];
+const _renderHabitWizard=window.renderHabitWizard;
+window.renderHabitWizard=function(){
+  _renderHabitWizard.apply(this,arguments);
+  if(habitWizard.step!==1)return;
+  const grid=document.querySelector("#modalBody .form-grid");if(!grid)return;
+  const cur=habitWizard.data.icon||"";
+  const f=document.createElement("div");f.className="field";
+  f.innerHTML=`<label>Ikon <span class="muted">(opsional)</span></label><div class="day-picker" role="radiogroup" aria-label="Pilih ikon habit">${HABIT_ICONS.map(i=>`<button type="button" class="day-choice ${i===cur?"selected":""}" data-hicon="${i}" role="radio" aria-checked="${i===cur}" aria-label="Ikon ${i}">${i}</button>`).join("")}</div>`;
+  grid.insertBefore(f,grid.querySelector(".form-help"));
+  f.querySelectorAll("[data-hicon]").forEach(b=>b.onclick=()=>{
+    habitWizard.data.icon=b.dataset.hicon;
+    f.querySelectorAll("[data-hicon]").forEach(x=>{const on=x===b;x.classList.toggle("selected",on);x.setAttribute("aria-checked",on)});
+  });
+};
+const _saveHabitWizard=window.saveHabitWizard;
+window.saveHabitWizard=function(){
+  const n=DB.habits.length,icon=habitWizard.data.icon;
+  _saveHabitWizard.apply(this,arguments);
+  if(DB.habits.length>n&&icon){DB.habits[DB.habits.length-1].icon=icon;saveDB();renderHabits();renderHome()}
+};
+function paintHabitIcons(){
+  $$(".habit-icon[data-habit-detail]").forEach(b=>{
+    const h=DB.habits.find(x=>x.id===b.dataset.habitDetail);if(h&&h.icon)b.textContent=h.icon;
+  });
+  const di=$(".detail-icon"),sel=DB.habits.find(x=>x.id===selectedHabitId);
+  if(di&&sel&&sel.icon)di.textContent=sel.icon;
+}
+const _renderHabitList2=window.renderHabitList;
+window.renderHabitList=function(){_renderHabitList2.apply(this,arguments);try{paintHabitIcons()}catch(e){}};
+const _renderHabitDetail2=window.renderHabitDetail;
+window.renderHabitDetail=function(){_renderHabitDetail2.apply(this,arguments);try{paintHabitIcons()}catch(e){}};
+
+/* (c) Habit "beberapa kali per minggu": persentase dihitung per minggu terhadap targetnya
+       (sebelumnya per hari, sehingga target 3×/minggu mentok sekitar 43%),
+       dan streak mentolerir jeda sesuai sisa hari dalam seminggu. */
+const _habitCompletion=window.habitCompletion;
+window.habitCompletion=function(h,days){
+  if(!h||!h.frequency||h.frequency.type!=="mingguan")return _habitCompletion.apply(this,arguments);
+  days=days||30;
+  const target=Math.max(1,+h.frequency.timesPerWeek||1),weeks=Math.max(1,Math.floor(days/7));
+  let sum=0;
+  for(let w=0;w<weeks;w++){
+    let done=0;
+    for(let d=0;d<7;d++)if(habitDoneOnDate(h,addDays(now,-(w*7+d))))done++;
+    sum+=Math.min(done,target)/target;
+  }
+  return Math.round(sum/weeks*100);
+};
+const _habitStreak=window.habitStreak;
+window.habitStreak=function(h){
+  if(!h||!h.frequency||h.frequency.type!=="mingguan")return _habitStreak.apply(this,arguments);
+  const allowed=Math.max(1,7-Math.max(1,+h.frequency.timesPerWeek||1));
+  let streak=0,misses=0;
+  for(let i=0;i<90;i++){
+    if(habitDoneOnDate(h,addDays(now,-i))){streak++;misses=0;continue}
+    misses++;
+    if(misses>allowed)break;
+  }
+  return streak;
+};
+
+/* ---------- 16. INISIALISASI ---------- */
+const ver=$("#appVersion");if(ver)ver.textContent="v1.4.0";
 applyTheme();
 renderHome();
 renderFocusUI();
 syncNotifyBtn();
-applyHabitFilter();
+renderHabits();
 })();
