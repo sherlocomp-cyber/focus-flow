@@ -243,19 +243,7 @@ async function syncWakeLock(){
 }
 document.addEventListener("visibilitychange",syncWakeLock);
 
-/* ---------- 11. HALAMAN BARU SELALU MULAI DARI ATAS ---------- */
-try{
-  const mo=new MutationObserver(list=>{
-    for(const m of list){
-      if(m.target.classList.contains("active")&&!(m.oldValue||"").split(/\s+/).includes("active")){
-        window.scrollTo({top:0,behavior:"instant"});break;
-      }
-    }
-  });
-  document.querySelectorAll(".page").forEach(p=>mo.observe(p,{attributes:true,attributeFilter:["class"],attributeOldValue:true}));
-}catch(e){}
-
-/* ---------- 12. PINTASAN KEYBOARD (desktop): Spasi = mulai/jeda timer, N = tugas baru ---------- */
+/* ---------- 11. PINTASAN KEYBOARD (desktop): Spasi = mulai/jeda timer, N = tugas baru ---------- */
 const startBtn=$("#focusStart");
 if(startBtn)startBtn.title="Pintasan keyboard: Spasi";
 document.addEventListener("keydown",e=>{
@@ -268,7 +256,7 @@ document.addEventListener("keydown",e=>{
   else if((e.key==="n"||e.key==="N")&&typeof openTaskModal==="function"){e.preventDefault();openTaskModal()}
 });
 
-/* ---------- 13. HABIT: kolom pencarian (muncul jika habit aktif ≥ 5) ---------- */
+/* ---------- 12. HABIT: kolom pencarian (muncul jika habit aktif ≥ 5) ---------- */
 let habitQuery="";
 function applyHabitFilter(){
   const list=$("#habitList");if(!list||!list.parentNode)return;
@@ -302,7 +290,7 @@ function applyHabitFilter(){
 const _renderHabitList=window.renderHabitList;
 window.renderHabitList=function(){_renderHabitList.apply(this,arguments);try{applyHabitFilter()}catch(e){}};
 
-/* ---------- 14. LAYAR PENUH TIMER: tampilan minimal + label tombol + modal tetap terlihat ---------- */
+/* ---------- 13. LAYAR PENUH TIMER: tampilan minimal + label tombol + modal tetap terlihat ---------- */
 const fsStyle=document.createElement("style");
 fsStyle.textContent=
 "#page-fokus:fullscreen{background:var(--bg);overflow:auto;display:grid;place-items:center;padding:16px}"+
@@ -322,7 +310,7 @@ if(modalBd)new MutationObserver(()=>{
   if(modalBd.classList.contains("open")&&document.fullscreenElement)document.exitFullscreen().catch(()=>{});
 }).observe(modalBd,{attributes:true,attributeFilter:["class"]});
 
-/* ---------- 15. PERBAIKAN LOGIKA: tombol Lewati, ikon habit, habit mingguan ---------- */
+/* ---------- 14. PERBAIKAN LOGIKA: tombol Lewati, ikon habit, habit mingguan ---------- */
 /* (a) "Lewati" sebelumnya mencatat sesi fokus selesai walau baru berjalan beberapa detik,
        dan melewati fase fokus yang belum dimulai tetap menambah hitungan 4 sesi.
        Sekarang sesi baru dicatat jika sudah berjalan minimal MIN_SESI_MENIT. */
@@ -397,13 +385,17 @@ window.renderHabitList=function(){_renderHabitList2.apply(this,arguments);try{pa
 const _renderHabitDetail2=window.renderHabitDetail;
 window.renderHabitDetail=function(){_renderHabitDetail2.apply(this,arguments);try{paintHabitIcons();addHabitIconPicker()}catch(e){}};
 
-/* (c) Habit "beberapa kali per minggu": persentase dihitung per minggu terhadap targetnya
-       (sebelumnya per hari, sehingga target 3×/minggu mentok sekitar 43%),
-       dan streak mentolerir jeda sesuai sisa hari dalam seminggu. */
+/* (c) Persentase & streak habit:
+       - habit baru dihitung sejak dibuat (sebelumnya hari ke-1 terbaca ±3% karena dibagi 30 hari)
+       - habit "beberapa kali per minggu" dihitung per minggu terhadap targetnya
+         (sebelumnya per hari, sehingga target 3×/minggu mentok ±43%)
+       - streak habit mingguan mentolerir jeda sesuai sisa hari dalam seminggu */
 const _habitCompletion=window.habitCompletion;
 window.habitCompletion=function(h,days){
-  if(!h||!h.frequency||h.frequency.type!=="mingguan")return _habitCompletion.apply(this,arguments);
   days=days||30;
+  const c=h&&h.createdAt?new Date(h.createdAt):null;
+  if(c&&!isNaN(c.getTime()))days=Math.max(1,Math.min(days,Math.floor((Date.now()-c.getTime())/864e5)+1));
+  if(!h||!h.frequency||h.frequency.type!=="mingguan")return _habitCompletion.call(this,h,days);
   const target=Math.max(1,+h.frequency.timesPerWeek||1),weeks=Math.max(1,Math.floor(days/7));
   let sum=0;
   for(let w=0;w<weeks;w++){
@@ -426,11 +418,119 @@ window.habitStreak=function(h){
   return streak;
 };
 
+/* ---------- 15. KONSISTENSI DATA & ALUR (ditemukan dari core.js / goals-tasks.js) ---------- */
+/* (a) Beranda, Insight, dan progres tujuan memakai hitungan habit versi lama (30 hari penuh, tanpa jadwal,
+       streak tanpa toleransi) sehingga angkanya berbeda dari halaman Kebiasaan. Samakan. */
+window.habitRate=function(h){return habitCompletion(h,30)};
+window.bestStreak=function(){return Math.max(0,...DB.habits.filter(x=>!x.archived).map(x=>habitStreak(x)))};
+
+/* (b) Form "Tambah tugas" cepat menerima nama berisi spasi saja → tugas tanpa judul */
+const _openTaskModal=window.openTaskModal;
+window.openTaskModal=function(){
+  _openTaskModal.apply(this,arguments);
+  const f=$("#taskForm"),orig=f&&f.onsubmit;
+  if(f&&orig)f.onsubmit=e=>{
+    if(!$("#taskName").value.trim()){e.preventDefault();toast("Nama tugas belum diisi.");$("#taskName").focus();return}
+    return orig.call(f,e);
+  };
+};
+const quickTaskBtn=$("#quickTask");
+if(quickTaskBtn)quickTaskBtn.onclick=()=>window.openTaskModal();   /* init.js mengikat fungsi lama; ikat ulang */
+
+/* (c) Kanban: tugas berstatus "inbox" (semua tugas baru dari modul Tugas) tidak muncul di kolom mana pun.
+       Sekarang tampil di kolom Todo; menyeretnya ke kolom lain memprosesnya dari Inbox. */
+window.renderKanban=function(){
+  const cols=[["todo","Todo",t=>t.status==="todo"||t.status==="inbox"],["doing","Doing",t=>t.status==="doing"],["done","Done",t=>t.status==="done"]];
+  return `<div class="task-full-card"><div><h2 class="card-title">Kanban</h2><p class="card-subtitle">Pindahkan task sesuai tahap pengerjaan. Tugas dari Inbox ada di kolom Todo.</p></div><div class="kanban">${cols.map(([k,title,f])=>{const a=DB.tasks.filter(f);return `<div class="kan-col" data-kanban="${k}"><div class="kan-head"><span class="kan-title">${title}</span><span class="kan-count">${a.length}</span></div><div class="drop-list">${a.map(t=>`<div class="drop-task" draggable="true" data-drag-task="${t.id}">${escapeHtml(t.title)}<div class="tm-notes">${t.actualPomodoro||0}/${t.estimatePomodoro||1} 🍅</div></div>`).join("")}</div></div>`}).join("")}</div><div class="touch-drag-hint">Layar sentuh: tekan-tahan kartu lalu geser ke kolom tujuan.</div></div>`;
+};
+
+/* (d) Urutan Ivy Lee bisa ganda (mis. 1,2,3 → tugas 2 selesai → tugas baru mendapat 3 lagi). Rapikan sebelum tampil. */
+const _renderIvy=window.renderIvy;
+window.renderIvy=function(){
+  DB.tasks.filter(t=>t.status!=="done"&&t.ivyLeeOrder>=1&&t.ivyLeeOrder<=6)
+    .sort((x,y)=>x.ivyLeeOrder-y.ivyLeeOrder).forEach((t,i)=>{t.ivyLeeOrder=i+1});
+  return _renderIvy.apply(this,arguments);
+};
+
+/* (e) XP "dobel": menyeret tugas ke kolom Done berkali-kali, atau menandai milestone selesai berkali-kali,
+       memberi XP setiap kali. Sekarang sekali per tugas / milestone. */
+const _applyDrop=window.applyDrop;
+window.applyDrop=function(id,target){
+  const t=taskById(id),prevXp=DB.profile.xp||0,wasAwarded=!!(t&&t.xpAwarded);
+  _applyDrop.apply(this,arguments);
+  if(t&&target==="done"){
+    DB.profile.xp=prevXp;
+    if(!wasAwarded){t.xpAwarded=true;DB.profile.xp=prevXp+10}
+    saveDB();
+  }
+};
+const _renderGoals=window.renderGoals;
+window.renderGoals=function(){
+  _renderGoals.apply(this,arguments);
+  $$("[data-ms-toggle]").forEach(b=>b.onclick=()=>{
+    const g=goalById(b.dataset.goalId),m=g&&g.milestones.find(x=>x.id===b.dataset.msToggle);if(!m)return;
+    const prevXp=DB.profile.xp||0,prevAwarded=m.xpAwarded;
+    m.done=!m.done;let gained=0;
+    if(m.done&&!m.xpAwarded){m.xpAwarded=true;DB.profile.xp=prevXp+50;gained=50}
+    saveDB();renderGoals();renderHome();
+    toast(m.done?(gained?"+50 XP · Milestone selesai.":"Milestone selesai."):"Milestone dibuka lagi untuk dilanjutkan.",{
+      label:"Urungkan",
+      action:()=>{m.done=!m.done;m.xpAwarded=prevAwarded;DB.profile.xp=prevXp;saveDB();renderGoals();renderHome()}
+    });
+  });
+};
+
+/* (f) Mengedit tujuan mereset progres Key Result ke nilai awal dan menghapus penanda XP milestone. Pertahankan. */
+const _saveGoalWizard=window.saveGoalWizard;
+window.saveGoalWizard=function(old){
+  const krPrev=old?(old.keyResults||[]).map(k=>({title:k.title,current:k.current})):[];
+  const msPrev=old?(old.milestones||[]).map(m=>({title:m.title,xp:m.xpAwarded,due:m.dueDate})):[];
+  _saveGoalWizard.apply(this,arguments);
+  if(!old)return;
+  (old.keyResults||[]).forEach((k,i)=>{const p=krPrev.find(x=>x.title===k.title)||krPrev[i];if(p&&Number.isFinite(Number(p.current)))k.current=Number(p.current)});
+  (old.milestones||[]).forEach((m,i)=>{const p=msPrev.find(x=>x.title===m.title)||msPrev[i];if(p){if(p.xp)m.xpAwarded=true;if(p.due&&!m.dueDate)m.dueDate=p.due}});
+  saveDB();renderGoals();renderHome();
+};
+
+/* (g) Tujuan tidak bisa ditandai selesai atau dihapus (status hanya "aktif"). Tambahkan keduanya, lengkap dengan Urungkan. */
+const _goalCard=window.goalCard;
+window.goalCard=function(g){
+  const html=_goalCard.apply(this,arguments);
+  const extra=`<button class="pill-btn" data-goal-status="${g.id}">${g.status==="selesai"?"Aktifkan lagi":"Tandai selesai"}</button><button class="pill-btn ghost" style="color:var(--danger)" data-goal-del="${g.id}" aria-label="Hapus tujuan ${escapeHtml(g.title)}">Hapus</button>`;
+  return html.replace(`data-goal-select="${g.id}">Roadmap</button></div>`,`data-goal-select="${g.id}">Roadmap</button>${extra}</div>`);
+};
+document.addEventListener("click",e=>{
+  const st=e.target.closest("[data-goal-status]");
+  if(st){
+    const g=goalById(st.dataset.goalStatus);if(!g)return;
+    const prev=g.status;g.status=prev==="selesai"?"aktif":"selesai";
+    saveDB();renderGoals();renderHome();
+    toast(g.status==="selesai"?"Tujuan ditandai selesai. 🎉":"Tujuan diaktifkan lagi.",{label:"Urungkan",action:()=>{g.status=prev;saveDB();renderGoals();renderHome()}});
+    return;
+  }
+  const del=e.target.closest("[data-goal-del]");
+  if(del){
+    const i=DB.goals.findIndex(x=>x.id===del.dataset.goalDel);if(i<0)return;
+    const g=DB.goals.splice(i,1)[0];
+    const tIds=DB.tasks.filter(t=>t.goalId===g.id).map(t=>t.id),hIds=DB.habits.filter(h=>h.goalId===g.id).map(h=>h.id);
+    DB.tasks.forEach(t=>{if(tIds.includes(t.id))t.goalId=undefined});
+    DB.habits.forEach(h=>{if(hIds.includes(h.id))h.goalId=undefined});
+    saveDB();renderGoals();renderHome();
+    toast("Tujuan dihapus. Tugas dan habit yang tertaut tetap ada.",{label:"Urungkan",action:()=>{
+      DB.goals.splice(Math.min(i,DB.goals.length),0,g);
+      DB.tasks.forEach(t=>{if(tIds.includes(t.id))t.goalId=g.id});
+      DB.habits.forEach(h=>{if(hIds.includes(h.id))h.goalId=g.id});
+      saveDB();renderGoals();renderHome();
+    }});
+  }
+});
+
 /* ---------- 16. INISIALISASI ---------- */
-const ver=$("#appVersion");if(ver)ver.textContent="v1.4.1";
+const ver=$("#appVersion");if(ver)ver.textContent="v1.5.0";
 applyTheme();
 renderHome();
 renderFocusUI();
 syncNotifyBtn();
 renderHabits();
+renderGoals();
 })();
