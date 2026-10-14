@@ -1,0 +1,26 @@
+{
+ "name": "FocusFlow — Goal, Habit & Task Manager",
+ "short_name": "FocusFlow",
+ "description": "Goal, kebiasaan, tugas, dan timer fokus Pomodoro. Offline.",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#F6F3EE",
+ "theme_color": "#F6F3EE",
+ "lang": "id",
+ "icons": [
+  {
+   "src": "icon.svg",
+   "sizes": "any",
+   "type": "image/svg+xml",
+   "purpose": "any"
+  },
+  {
+   "src": "icon.svg",
+   "sizes": "any",
+   "type": "image/svg+xml",
+   "purpose": "maskable"
+  }
+ ]
+}
