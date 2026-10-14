@@ -1,60 +1,42 @@
 name: Build APK
 
 on:
+  push:
+    branches: [main, master]
   workflow_dispatch:
-    inputs:
-      tag:
-        description: "Tag rilis tempat APK ditempelkan (kosongkan untuk hanya membuat artifact)"
-        default: "v1.0.0"
-        required: false
 
 permissions:
   contents: write
 
 jobs:
-  apk:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
+        with: { node-version: 20 }
       - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-
-      - name: Siapkan folder web
-        run: |
-          mkdir www
-          cp index.html styles.css core.js goals-tasks.js habits-focus.js init.js manifest.webmanifest icon.svg sw.js www/
-
-      - name: Pasang Capacitor dan buat proyek Android
-        run: |
-          npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init "FocusFlow" "com.sherlocomp.focusflow" --web-dir www
-          npx cap add android
-          npx cap sync android
-
-      - name: Build APK debug
+        with: { distribution: temurin, java-version: 17 }
+      - run: npm install
+      - run: node prepare-www.js
+      - run: npx cap add android
+      - run: node prepare-android.js
+        env:
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+      - run: npx cap sync android
+      - name: Build APK
         working-directory: android
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug
-
+        run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
       - name: Ganti nama APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk FocusFlow.apk
-
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk FocusFlow-v1.1.${{ github.run_number }}.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: FocusFlow-apk
-          path: FocusFlow.apk
-
-      - name: Tempel APK ke rilis
-        if: ${{ github.event.inputs.tag != '' }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "${{ github.event.inputs.tag }}" FocusFlow.apk --clobber
+          name: FocusFlow-APK
+          path: FocusFlow-v1.1.${{ github.run_number }}.apk
+      - name: Buat Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.1.${{ github.run_number }}
+          name: FocusFlow v1.1.${{ github.run_number }}
+          generate_release_notes: true
+          files: FocusFlow-v1.1.${{ github.run_number }}.apk
