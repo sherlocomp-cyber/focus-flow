@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="id" data-theme="system">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F6F3EE">
+<title>FocusFlow — Goal, Habit & Task Manager</title>
+<meta name="description" content="FocusFlow: aplikasi goal, kebiasaan, tugas, dan timer fokus Pomodoro. Offline, data tersimpan di perangkatmu.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app-shell">
+  <header class="container topbar">
+    <a class="brand" role="button" tabindex="0" data-route="beranda" aria-label="FocusFlow Beranda">
+      <span class="brand-mark">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3c3.7 0 6.8 3 6.8 6.7 0 5.1-4.8 8.4-6.8 10.3-2-1.9-6.8-5.2-6.8-10.3C5.2 6 8.3 3 12 3Z" fill="currentColor"/><path d="M12 6v11M8.5 9.5 12 12l3.5-2.5" stroke="#0B3D2E" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </span>
+      <span>FocusFlow</span>
+    </a>
+    <div class="top-actions">
+      <button class="pill-btn icon ghost" id="themeQuick" title="Ganti tema" aria-label="Ganti tema">◐</button>
+      <button class="avatar" id="profileBtn" aria-label="Profil">FF</button>
+    </div>
+  </header>
+
+  <main class="container app-main">
+    <!-- BERANDA -->
+    <section class="page active" id="page-beranda" data-page="beranda">
+      <div id="storageBanner" class="storage-banner" hidden><div><strong>Penyimpanan browser diblokir.</strong><p>Data akan hilang saat ditutup. Ekspor cadangan secara berkala.</p></div><button class="pill-btn amber" id="storageExportBtn" type="button">Ekspor</button></div>
+      <div id="backupReminder" class="backup-reminder" hidden><div><strong>Saatnya simpan cadangan.</strong><p>Sudah 7 hari sejak ekspor terakhir dan ada perubahan data baru.</p></div><button class="pill-btn amber" id="backupExportBtn" type="button">Ekspor sekarang</button></div>
+      <div class="bento-grid">
+        <article class="bento-card glass hero span-2">
+          <svg class="decor-leaf" width="170" height="150" viewBox="0 0 170 150" aria-hidden="true">
+            <path d="M161 16C92 22 40 54 20 121c52 11 107-17 141-105Z" fill="var(--primary-1)"/>
+            <path d="M22 120C67 91 100 62 151 27" stroke="var(--primary-2)" stroke-width="3" fill="none" opacity=".5"/>
+          </svg>
+          <div class="hero-copy">
+            <div class="date" id="todayText">Hari ini</div>
+            <h1 class="display">Selamat datang, <span class="hero-name" id="greetingName">Teman</span>.</h1>
+            <p class="quote" id="dailyQuote">Sedikit demi sedikit tetap membawa kamu maju.</p>
+          </div>
+          <div class="quick-actions">
+            <button class="pill-btn primary" id="quickTask">＋ Tambah tugas</button>
+            <button class="pill-btn" data-go="fokus">Mulai fokus</button>
+            <button class="pill-btn" data-go="kebiasaan">Cek kebiasaan</button>
+          </div>
+        </article>
+
+        <article class="bento-card glass span-2">
+          <div class="card-head">
+            <div><h2 class="card-title">Top 3 Fokus <button class="info" data-tip="Batasi 6 prioritas dan kerjakan berurutan." aria-label="Kenapa ini?">i</button></h2><p class="card-subtitle">Tiga hal yang paling layak mendapat perhatian.</p></div>
+            <button class="pill-btn icon ghost" id="openTasks" aria-label="Buka tugas">→</button>
+          </div>
+          <div class="task-list" id="topTasks"></div>
+        </article>
+
+        <article class="bento-card emerald span-2">
+          <svg class="decor-ball" width="110" height="110" viewBox="0 0 110 110" aria-hidden="true">
+            <circle cx="55" cy="55" r="43" fill="rgba(255,255,255,.45)"/>
+            <path d="M24 67c22-28 43-39 66-39M30 83c25-20 43-28 57-29" stroke="#fff" stroke-width="3" opacity=".45"/>
+          </svg>
+          <div class="card-head"><div><h2 class="card-title">🐸 Katak hari ini <button class="info" data-tip="Kerjakan yang paling berat saat energi masih penuh. Sisa hari terasa ringan. (Brian Tracy)" aria-label="Kenapa ini?">i</button></h2><p class="card-subtitle">Satu tugas berat saja. Tidak perlu mengejar semuanya sekaligus.</p></div></div>
+          <div class="row" style="gap:16px">
+            <div class="frog-big">🐸</div>
+            <div class="frog-copy">
+              <div class="frog-title" id="frogTitle">Belum ada katak.</div>
+              <div style="opacity:.78;font-size:13px" id="frogMeta">Pilih tugas sulit dari daftar tugas.</div>
+              <div style="margin-top:14px"><button class="pill-btn" id="frogStart">Mulai katak</button></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="bento-card glass">
+          <div class="card-head"><div><h2 class="card-title">🎯 Progres goal <button class="info" data-tip="Tujuan yang jelas dan terukur lebih mudah dicapai daripada niat yang samar." aria-label="Kenapa ini?">i</button></h2><p class="card-subtitle" id="goalName">Goal aktif</p></div></div>
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <div class="progress-ring" id="goalRing"></div>
+            <div style="flex:1;padding-left:14px"><div class="eyebrow">Menuju target</div><div style="font-weight:800;margin-top:4px" id="goalDeadline">—</div><div class="muted" style="font-size:12px;margin-top:4px" id="goalMilestone">—</div></div>
+          </div>
+        </article>
+
+        <article class="bento-card glass">
+          <div class="card-head"><div><h2 class="card-title">🔥 Streak minggu ini <button class="info" data-tip="Lewat sekali tidak apa-apa. Yang penting jangan dua kali berturut-turut." aria-label="Kenapa ini?">i</button></h2><p class="card-subtitle">Konsisten tanpa harus sempurna.</p></div></div>
+          <div class="between"><div><div class="streak-number" id="streakNumber">0</div><div class="muted">hari beruntun</div></div><span class="chip" id="habitRate">0%</span></div>
+          <div class="week-dots" id="weekDots"></div>
+        </article>
+
+        <article class="bento-card glass span-2">
+          <div class="card-head"><div><h2 class="card-title">Fokus 7 hari <button class="info" data-tip="Fokus penuh 25 menit lalu istirahat singkat menjaga otak tetap segar. (Cirillo)" aria-label="Kenapa ini?">i</button></h2><p class="card-subtitle">Menit fokus yang tercatat setiap hari.</p></div><span class="chip" id="focusTotalChip">0 menit</span></div>
+          <div id="focusChart"></div>
+        </article>
+
+        <article class="bento-card amber">
+          <div class="card-head"><div><h2 class="card-title">⏱ Fokus sekarang <button class="info" data-tip="Fokus penuh 25 menit lalu istirahat singkat menjaga otak tetap segar. (Cirillo)" aria-label="Kenapa ini?">i</button></h2><p class="card-subtitle">Timer mini untuk langsung mulai.</p></div></div>
+          <div class="timer-mode" id="miniMode">POMODORO</div>
+          <div class="timer-display" id="miniTimer">25:00</div>
+          <div class="timer-mini-actions"><button class="pill-btn" id="miniStart">Mulai</button><button class="pill-btn ghost" id="miniReset">Reset</button></div>
+        </article>
+
+        <article class="bento-card cream">
+          <div class="card-head"><div><h2 class="card-title">🧩 Belum tuntas <button class="info" data-tip="Pekerjaan setengah jadi terus mengganggu pikiran. Selesaikan atau catat langkah berikutnya. (Efek Zeigarnik)" aria-label="Kenapa ini?">i</button></h2><p class="card-subtitle">Yang menggantung, bukan untuk menghakimi.</p></div><span class="chip amber" id="hangingCount">0</span></div>
+          <div class="task-list" id="hangingTasks"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- 7 HALAMAN -->
+    <section class="page" id="page-fokus" data-page="fokus">
+      <div class="bento-grid focus-layout">
+        <article class="bento-card emerald span-2 focus-main-card">
+          <svg class="decor-ball" width="150" height="150" viewBox="0 0 150 150" aria-hidden="true"><circle cx="75" cy="75" r="58" fill="rgba(255,255,255,.22)"/><path d="M37 92c27-36 53-51 85-56M45 113c30-25 53-35 72-37" stroke="#fff" stroke-width="4" opacity=".35" fill="none"/></svg>
+          <div class="card-head">
+            <div><div class="eyebrow" style="color:rgba(255,255,255,.7)">Ruang Fokus</div><h1 class="display" style="margin-bottom:5px">Kerjakan satu hal.</h1><p class="card-subtitle">Fokus penuh 25 menit lalu istirahat singkat menjaga otak tetap segar. <button class="info" data-tip="Fokus penuh 25 menit lalu istirahat singkat menjaga otak tetap segar. (Cirillo)" aria-label="Kenapa ini?">i</button></p></div>
+            <button class="pill-btn icon" id="focusFullscreen" title="Layar penuh" aria-label="Layar penuh">⛶</button>
+          </div>
+          <div class="focus-center">
+            <div id="focusRing"></div>
+            <div class="focus-time" id="focusTimer">25:00</div>
+            <div class="timer-mode" id="focusPhase">FOKUS · KLASIK</div>
+          </div>
+          <div class="focus-task-line"><span class="muted-light">Tugas</span><strong id="focusTaskLabel">Pilih tugas untuk mulai</strong></div>
+          <div class="focus-actions">
+            <button class="pill-btn" id="focusSkip">Lewati</button>
+            <button class="pill-btn primary-light" id="focusStart">Mulai fokus</button>
+            <button class="pill-btn" id="focusReset">Reset</button>
+          </div>
+          <div class="focus-cycle"><span id="cycleText">Sesi 1 · 0/4 fokus</span><span id="autoStartLabel">Auto-start mati</span></div>
+        </article>
+
+        <article class="bento-card glass">
+          <div class="card-head"><div><h2 class="card-title">Pilih tugas</h2><p class="card-subtitle">Hubungkan sesi dengan pekerjaan yang sedang kamu kerjakan.</p></div><button class="info" data-tip="Mengaitkan timer dengan tugas membuat sesi fokus punya tujuan yang spesifik." aria-label="Kenapa ini?">i</button></div>
+          <select class="focus-select" id="focusTaskSelect"><option value="">Tanpa tugas</option></select>
+          <div class="focus-current-task" id="focusSelectedTask">Belum ada tugas dipilih.</div>
+        </article>
+
+        <article class="bento-card glass">
+          <div class="card-head"><div><h2 class="card-title">Mode fokus</h2><p class="card-subtitle">Pilih ritme yang sesuai dengan pekerjaanmu.</p></div></div>
+          <div class="mode-grid">
+            <button class="mode-btn active" data-mode="klasik"><strong>Klasik</strong><span>25 / 5 / 15</span><i class="info" data-tip="Fokus penuh 25 menit lalu istirahat singkat menjaga otak tetap segar. (Cirillo)">i</i></button>
+            <button class="mode-btn" data-mode="deepwork"><strong>Deep Work</strong><span>50 / 10</span><i class="info" data-tip="Kerja tanpa gangguan menghasilkan karya terbaik. (Cal Newport)">i</i></button>
+            <button class="mode-btn" data-mode="flow"><strong>Flow</strong><span>Hitung maju</span><i class="info" data-tip="Tenggelam penuh dalam pekerjaan terjadi saat tantangan pas dengan kemampuanmu. (Csikszentmihalyi)">i</i></button>
+          </div>
+        </article>
+
+        <article class="bento-card amber">
+          <div class="card-head"><div><h2 class="card-title">Suasana fokus</h2><p class="card-subtitle">Ambient dibuat langsung dari Web Audio.</p></div></div>
+          <div class="ambient-grid">
+            <button class="ambient-btn active" data-ambient="mati">Mati</button>
+            <button class="ambient-btn" data-ambient="hujan">🌧 Hujan</button>
+            <button class="ambient-btn" data-ambient="kafe">☕ Kafe</button>
+            <button class="ambient-btn" data-ambient="putih">〰 White noise</button>
+          </div>
+          <div class="between" style="margin-top:15px"><span style="font-size:12px;font-weight:800">Volume</span><input id="ambientVolume" type="range" min="0" max="1" step=".05" value=".6" style="width:130px"></div>
+        </article>
+
+        <article class="bento-card cream">
+          <div class="card-head"><div><h2 class="card-title">Pengaturan sesi</h2><p class="card-subtitle">Atur perilaku timer sesuai ritmemu.</p></div></div>
+          <div class="setting-row"><span>Auto-start berikutnya</span><button class="toggle" id="focusAutoStart"><i></i></button></div>
+          <div class="setting-row"><span>Istirahat panjang tiap 4 sesi</span><span class="chip">Aktif</span></div>
+          <div class="setting-row"><span>Notifikasi browser</span><button class="pill-btn" id="notifyPermission">Aktifkan</button></div>
+        </article>
+
+        <article class="bento-card glass span-2">
+          <div class="card-head"><div><h2 class="card-title">Gangguan selama sesi</h2><p class="card-subtitle">Catat singkat agar kamu bisa kembali tanpa membawa gangguan itu di kepala.</p></div><button class="pill-btn" id="addInterruption">＋ Catat</button></div>
+          <div id="interruptionList" class="task-list"><div class="empty-placeholder" style="min-height:90px">Belum ada gangguan.</div></div>
+        </article>
+
+        <article class="bento-card glass span-2">
+          <div class="card-head"><div><h2 class="card-title">Sesi terakhir</h2><p class="card-subtitle">Refleksi singkat membantu melihat pola fokus.</p></div><span class="chip" id="lastSessionRating">—</span></div>
+          <div id="lastSessionInfo" class="muted">Belum ada sesi tersimpan.</div>
+        </article>
+      </div>
+    </section>
+    <section class="page" id="page-tugas" data-page="tugas">
+      <div class="bento-grid">
+        <article class="bento-card glass span-4">
+          <div class="card-head">
+            <div><div class="eyebrow">Tugas</div><h1 class="display" style="font-size:clamp(30px,6vw,42px)">Semua pekerjaan, lebih tertata.</h1><p class="card-subtitle">Tangkap cepat, pilih prioritas, lalu kerjakan satu per satu.</p></div>
+            <button class="pill-btn primary" id="newTaskModuleBtn">＋ Tambah tugas</button>
+          </div>
+          <div class="task-tabs" id="taskTabs">
+            <button class="task-tab active" data-task-view="inbox">Inbox</button><button class="task-tab" data-task-view="list">Daftar</button><button class="task-tab" data-task-view="matrix">Eisenhower</button><button class="task-tab" data-task-view="kanban">Kanban</button><button class="task-tab" data-task-view="calendar">Kalender</button><button class="task-tab" data-task-view="ivy">Ivy Lee</button>
+          </div>
+        </article>
+        <article class="bento-card glass span-4" id="taskWorkspace"></article>
+      </div>
+    </section>
+    <section class="page" id="page-kebiasaan" data-page="kebiasaan">
+      <div class="bento-grid">
+        <article class="bento-card glass span-2">
+          <div class="card-head">
+            <div><div class="eyebrow">Kebiasaan</div><h1 class="display" style="font-size:clamp(30px,6vw,42px)">Bangun pola, bukan tekanan.</h1><p class="card-subtitle">Lewat sekali tidak apa-apa. Yang penting jangan dua kali berturut-turut. <button class="info" data-tip="Lewat sekali tidak apa-apa. Yang penting jangan dua kali berturut-turut." aria-label="Kenapa ini?">i</button></p></div>
+            <button class="pill-btn primary" id="newHabitBtn">＋ Habit baru</button>
+          </div>
+          <div id="habitStreakBanner"></div>
+          <div class="habit-list" id="habitList" style="margin-top:14px"></div>
+        </article>
+
+        <article class="bento-card glass">
+          <div class="card-head"><div><h2 class="card-title">Konsistensi</h2><p class="card-subtitle">30 hari terakhir.</p></div><button class="info" data-tip="Kebiasaan lebih mudah bertahan ketika perilaku dibuat jelas, kecil, dan mudah dilakukan pada konteks yang sama." aria-label="Kenapa ini?">i</button></div>
+          <div class="between"><div><div class="display" style="font-size:38px;margin:0" id="habitOverallRate">0%</div><div class="muted">rata-rata selesai</div></div><div id="habitRing"></div></div>
+          <div class="progress-track" style="margin-top:18px"><div class="progress-fill" id="habitRateBar" style="width:0%"></div></div>
+        </article>
+
+        <article class="bento-card cream span-2">
+          <div class="card-head"><div><h2 class="card-title">Heatmap 12 minggu <button class="info" data-tip="Heatmap membantu melihat pola konsistensi secara visual dari waktu ke waktu." aria-label="Kenapa ini?">i</button></h2><p class="card-subtitle">Setiap kotak adalah satu hari. Warna makin kuat berarti lebih banyak habit yang selesai.</p></div></div>
+          <div id="habitHeatmap"></div>
+        </article>
+
+        <article class="bento-card glass">
+          <div class="card-head"><div><h2 class="card-title">Cara bangkit</h2><p class="card-subtitle">Kalau streak putus, kecilkan langkahnya.</p></div><span class="chip">Never miss twice</span></div>
+          <p class="muted" style="font-size:13px;margin:0">Tidak perlu membayar “utang” hari kemarin. Cukup kembali hari ini, bahkan dengan versi 2 menit.</p>
+        </article>
+
+        <article class="bento-card glass span-2">
+          <div class="card-head"><div><h2 class="card-title">Detail habit</h2><p class="card-subtitle">Pilih satu kebiasaan untuk melihat resep, statistik, dan saran.</p></div></div>
+          <div id="habitDetail"><div class="empty-placeholder" style="min-height:190px">Pilih habit di daftar untuk melihat detail.</div></div>
+        </article>
+      </div>
+    </section>
+    <section class="page" id="page-tujuan" data-page="tujuan">
+      <div class="bento-grid">
+        <article class="bento-card glass span-4">
+          <div class="card-head"><div><div class="eyebrow">Tujuan</div><h1 class="display" style="font-size:clamp(30px,6vw,42px)">Tujuan besar, langkah yang jelas.</h1><p class="card-subtitle">Ubah niat menjadi hasil yang bisa dilihat dan ditinjau.</p></div><button class="pill-btn primary" id="newGoalBtn">＋ Tujuan baru</button></div>
+          <div class="goal-toolbar"><span class="chip" id="goalActiveChip">0 aktif</span><span class="chip">SMART & OKR</span></div>
+        </article>
+        <article class="bento-card glass span-4"><div class="between"><div><h2 class="card-title">Tujuan aktif</h2><p class="card-subtitle">Progres dihitung dari hasil, milestone, task, dan habit yang ditautkan.</p></div></div><div id="goalList" class="goal-list"></div></article>
+        <article class="bento-card glass span-4"><div class="between"><div><h2 class="card-title">Roadmap</h2><p class="card-subtitle">Lihat urutan milestone sampai deadline.</p></div><button class="info" data-tip="Tujuan yang jelas dan terukur lebih mudah dicapai daripada niat yang samar.">i</button></div><div id="goalRoadmap" class="goal-roadmap"></div></article>
+        <article class="bento-card glass span-4"><div class="between"><div><h2 class="card-title">Review terpandu</h2><p class="card-subtitle">Berhenti sebentar untuk melihat apa yang berhasil dan apa yang perlu diubah.</p></div><div class="row"><button class="pill-btn" id="weeklyReviewBtn">Mingguan</button><button class="pill-btn" id="monthlyReviewBtn">Bulanan</button></div></div><div id="reviewPanel"></div></article>
+      </div>
+    </section>
+    <section class="page" id="page-insight" data-page="insight">
+<div class="bento-grid">
+<article class="bento-card glass span-4"><div class="eyebrow">Insight</div><h1 class="display">Kenali pola kerjamu.</h1><p class="card-subtitle">Data membantu memilih langkah berikutnya, bukan menghakimi.</p></article>
+<article class="bento-card glass span-2"><h2 class="card-title">Total fokus</h2><div class="display" id="insightFocusTotal">0j</div><p class="card-subtitle">Semua sesi tersimpan.</p></article>
+<article class="bento-card glass span-2"><h2 class="card-title">Jam produktif</h2><div class="display" id="insightBestHour">—</div><p class="card-subtitle" id="insightBestHourMeta">Belum cukup data.</p></article>
+<article class="bento-card glass span-2"><h2 class="card-title">Skor minggu ini</h2><div class="display" id="insightScore">0</div><div class="goal-bar"><i id="insightScoreBar" style="width:0%"></i></div></article>
+<article class="bento-card glass span-2"><h2 class="card-title">Level</h2><div class="display" id="insightLevel">Lv 1</div><p class="card-subtitle" id="insightXp">0 XP</p></article>
+<article class="bento-card glass span-4"><h2 class="card-title">Tren fokus 7 hari</h2><div id="insightFocusTrend" class="mini-chart"></div></article>
+<article class="bento-card glass span-2"><h2 class="card-title">Tren habit</h2><div id="insightHabitTrend"></div></article>
+<article class="bento-card glass span-2"><h2 class="card-title">Progres goal</h2><div id="insightGoalTrend"></div></article>
+<article class="bento-card glass span-4"><h2 class="card-title">Insight otomatis</h2><div id="autoInsights" class="stack"></div></article>
+<article class="bento-card glass span-4"><div class="between"><h2 class="card-title">Lencana</h2><span class="chip" id="badgeCount">0/5</span></div><div id="badgeGrid" class="badge-grid"></div></article>
+</div></section>
+    <section class="page" id="page-pengaturan" data-page="pengaturan">
+<div class="bento-grid">
+<article class="bento-card glass span-4"><div class="eyebrow">Pengaturan</div><h1 class="display">Atur FocusFlow sesuai caramu.</h1><p class="card-subtitle">Semua pengaturan disimpan di perangkat ini.</p></article>
+<article class="bento-card glass span-2"><h2 class="card-title">Tema</h2><select id="settingsTheme" class="filter-select" style="width:100%"><option value="system">Sistem</option><option value="terang">Terang</option><option value="gelap">Gelap</option></select></article>
+<article class="bento-card glass span-2"><h2 class="card-title">Durasi timer</h2><div id="timerSettings" class="settings-stack"></div></article>
+<article class="bento-card glass span-2"><h2 class="card-title">Ambient</h2><select id="settingsAmbient" class="filter-select" style="width:100%"><option value="mati">Mati</option><option value="hujan">Hujan</option><option value="kafe">Kafe</option><option value="putih">White noise</option></select></article>
+<article class="bento-card glass span-2"><h2 class="card-title">Streak freeze</h2><div class="display" id="freezeCount">0</div><button class="pill-btn" id="useFreezeBtn">Gunakan 1 freeze</button></article>
+<article class="bento-card glass span-4"><h2 class="card-title">Data</h2><p class="card-subtitle">Cadangkan atau pindahkan data FocusFlow.</p><div class="row" style="flex-wrap:wrap"><button class="pill-btn primary" id="exportJsonBtn">Ekspor JSON</button><button class="pill-btn" id="importJsonBtn">Impor JSON</button><button class="pill-btn" id="exportCsvBtn">Ekspor CSV</button><input id="importJsonFile" type="file" accept=".json,application/json" hidden></div></article>
+<article class="bento-card glass span-4"><h2 class="card-title">Reset data</h2><p class="card-subtitle">Hapus semua data FocusFlow di perangkat ini. Ekspor cadangan dulu jika perlu.</p><button class="pill-btn danger" id="resetData">Reset data</button></article>
+<article class="bento-card glass span-4"><h2 class="card-title">Tentang</h2><p class="card-subtitle">FocusFlow <span id="appVersion"></span> · semua data tersimpan di perangkat ini.</p></article>
+</div></section>
+  </main>
+
+  <nav class="pill-nav nav-bottom" aria-label="Navigasi utama"></nav>
+  <nav class="pill-nav nav-top" aria-label="Navigasi utama desktop"></nav>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" tabindex="-1" aria-labelledby="modalTitle">
+    <div class="modal-head"><h2 id="modalTitle">Tambah tugas</h2><div class="modal-head-actions"><button class="pill-btn ghost modal-back-btn" id="modalBack" type="button">Kembali</button><button class="pill-btn icon ghost" id="modalClose" type="button" aria-label="Tutup">×</button></div></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="core.js"></script>
+<script src="goals-tasks.js"></script>
+<script src="habits-focus.js"></script>
+<script src="init.js"></script>
+</body>
+</html>
