@@ -25,6 +25,11 @@ Membuka `index.html` langsung dari berkas (`file://`) juga berjalan, tetapi mode
 
 `Settings` → `Pages` → *Deploy from a branch* → branch `main`, folder `/ (root)`.
 Aplikasi tersedia di `https://<username>.github.io/focus-flow/`.
+(GitHub Pages untuk repo privat memerlukan paket berbayar.)
+
+### APK Android
+
+Tab **Actions → Build APK → Run workflow** membangun APK (Capacitor) dan menempelkannya ke rilis dengan tag yang diisi.
 
 ## Data dan privasi
 
@@ -41,7 +46,8 @@ Aplikasi tersedia di `https://<username>.github.io/focus-flow/`.
 | File | Fungsi |
 | --- | --- |
 | `index.html` | Kerangka halaman |
-| `styles.css` | Seluruh gaya |
+| `styles.css` | Gaya dasar |
+| `ux.css` | Penyempurnaan UI/UX (dimuat setelah `styles.css`, menimpa aturan lama) |
 | `core.js` | Data layer, logika, komponen UI, modal, insight, pengaturan |
 | `goals-tasks.js` | Modul goal dan tugas |
 | `habits-focus.js` | Modul habit dan mesin fokus (timer, audio, notifikasi) |
@@ -54,7 +60,7 @@ File JS adalah skrip klasik yang berbagi lingkup global, jadi urutan pemuatan di
 
 ## Pengembangan
 
-Tidak ada proses build. Setiap rilis: naikkan `APP_VERSION` di `core.js` dan `CACHE` di `sw.js` agar pengguna menerima pembaruan.
+Tidak ada proses build. Setiap rilis: naikkan `APP_VERSION` di `core.js` dan `CACHE` di `sw.js` agar pengguna menerima pembaruan, dan tambahkan file baru ke `ASSETS` di `sw.js`.
 
 ## Lisensi
 
