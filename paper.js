@@ -118,7 +118,8 @@ const tq=$("#themeQuick");if(tq)tq.onclick=window.cycleTheme;
 /* ---------- 04. PENGATURAN: kartu pratinjau tema ---------- */
 const SW=[["system","Sistem"],["terang","Terang"],["gelap","Gelap"],[T,"Kertas 3D"]];
 function syncSwatches(){
-  const cur=(window.DB&&DB.profile.settings.theme)||"system";
+  /* DB adalah const tingkat atas, bukan properti window: window.DB selalu undefined sehingga pilihan tema salah tampil "Sistem" */
+  const cur=(typeof DB!=="undefined"&&DB.profile&&DB.profile.settings&&DB.profile.settings.theme)||"system";
   document.querySelectorAll("[data-theme-pick]").forEach(b=>{
     const on=b.dataset.themePick===cur;b.setAttribute("aria-checked",on?"true":"false");
   });
@@ -152,6 +153,7 @@ if(load("ff:themeDefault","")!=="1"){
 }
 
 /* ---------- 06. INISIALISASI ---------- */
-const ver=$("#appVersion");if(ver)ver.textContent="v1.6.1";
+/* Versi diambil dari APP_VERSION (core.js) agar satu sumber; sebelumnya ditulis langsung "v1.6.1". */
+const ver=$("#appVersion");if(ver&&typeof APP_VERSION!=="undefined")ver.textContent="v"+APP_VERSION;
 applyTheme();
 })();
