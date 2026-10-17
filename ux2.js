@@ -122,4 +122,18 @@ step("aria-switch",()=>{
   const mo=new MutationObserver(ms=>ms.forEach(m=>sync(m.target)));
   document.querySelectorAll('.toggle[role="switch"]').forEach(t=>{sync(t);mo.observe(t,{attributes:true,attributeFilter:["class"]})});
 });
+
+/* ---------- 6. TEKS SIKLUS "n/4 FOKUS" ----------
+   habits-focus.js mencetak focusCount/4, padahal focusCount terus bertambah dan tidak pernah kembali ke 0,
+   sehingga muncul "5/4", "9/4". Tampilkan posisi dalam siklus 4 sesi: istirahat panjang = 4/4 (siklus penuh),
+   lalu mulai lagi dari 0/4. Hanya tampilan; logika timer tidak diubah. */
+step("cycle-text",()=>{
+  const fs=focusState,_r=window.renderFocusUI;
+  const fix=()=>step("cycle-text-render",()=>{
+    const el=$i("cycleText");
+    if(el)el.textContent="Sesi "+fs.cycleNo+" · "+(fs.phase==="long"?4:fs.focusCount%4)+"/4 fokus";
+  });
+  if(typeof _r==="function")window.renderFocusUI=function(){const r=_r.apply(this,arguments);fix();return r};
+  fix();   /* focus-plus.js bisa memulihkan focusCount saat muat; segarkan teks awal */
+});
 })();
