@@ -78,4 +78,48 @@ step("auto-zen",()=>{
     return _open.apply(this,arguments);
   };
 });
+
+/* =========================================================
+   TAHAP 2 — VISUAL / KEJELASAN (lihat HANDOFF bagian 6)
+   ========================================================= */
+
+/* ---------- 3. IKON SVG MENGGANTIKAN EMOJI DI JUDUL KARTU BERANDA (2a) ----------
+   Emoji berwarna bentrok dengan tema kertas (monokrom merah/abu) dan tampil beda per perangkat.
+   Gaya ikon = ICONS di core.js: viewBox 24, stroke currentColor 1.8. Hanya judul kartu Beranda;
+   .frog-big, status kosong, dan tombol tidak disentuh. Idempoten (aman dipanggil ulang). */
+step("beranda-icons",()=>{
+  const S=(p,extra)=>'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"'+(extra||"")+'>'+p+'</svg>';
+  const L='stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+  const SVG={
+    "🐸":S('<path d="M3 19 9.5 8l4 6.5 2.5-3.5L21 19H3Z" '+L+'/>'),                                   /* gunung = tugas terberat dulu */
+    "🎯":ICONS.tujuan,
+    "🔥":S('<path d="M12 3c.9 3.4 5 5.4 5 9.8A5 5 0 0 1 7 13c0-1.9.9-3.1 2-4.1.3 1.2 1 2 2 2.2C10.8 8 11 5.5 12 3Z" '+L+'/>'),
+    "⏱":ICONS.fokus,
+    "🧩":S('<path d="M20 12a8 8 0 1 1-3-6.2" '+L+'/><circle cx="12" cy="12" r="1.6" fill="currentColor"/>')   /* lingkaran belum tertutup */
+  };
+  document.querySelectorAll("#page-beranda .card-title").forEach(h=>{
+    if(h.querySelector(".ti"))return;
+    const t=h.firstChild;if(!t||t.nodeType!==3)return;
+    const m=/^\s*(🐸|🎯|🔥|⏱|🧩)\uFE0F?\s*/u.exec(t.nodeValue);if(!m||!SVG[m[1]])return;
+    t.nodeValue=t.nodeValue.slice(m[0].length);
+    const s=document.createElement("span");s.className="ti";s.setAttribute("aria-hidden","true");s.innerHTML=SVG[m[1]];
+    h.insertBefore(s,t);
+  });
+});
+
+/* ---------- 4. TOMBOL "i" GANDA (2c) ----------
+   Teks Cirillo sama muncul 4x. Dipertahankan di Ruang Fokus dan mode Klasik (halaman Fokus);
+   dihapus dari dua kartu Beranda (Fokus 7 hari, Fokus sekarang). */
+step("dedupe-info",()=>{
+  document.querySelectorAll('#page-beranda .info[data-tip*="Cirillo"]').forEach(b=>b.remove());
+});
+
+/* ---------- 5. ARIA-CHECKED PADA SEMUA TOGGLE (2e) ----------
+   Toggle memakai role="switch" tetapi statusnya hanya kelas .on, sehingga pembaca layar tidak tahu
+   statusnya (#focusAutoStart, #ffNoBreak). Samakan aria-checked dengan kelas .on, dan ikuti perubahannya. */
+step("aria-switch",()=>{
+  const sync=t=>t.setAttribute("aria-checked",String(t.classList.contains("on")));
+  const mo=new MutationObserver(ms=>ms.forEach(m=>sync(m.target)));
+  document.querySelectorAll('.toggle[role="switch"]').forEach(t=>{sync(t);mo.observe(t,{attributes:true,attributeFilter:["class"]})});
+});
 })();

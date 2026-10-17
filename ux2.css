@@ -5,6 +5,9 @@
       (Insight & Pengaturan dipindah ke menu avatar, lihat ux2.js)
    2. Avatar: penanda aktif + isi menu
    3. Beranda (HP): timer mini naik tepat setelah kartu Katak
+   4. Tahap 2: ikon judul kartu (ux2.js), tanpa backdrop-filter pada kartu
+   Warna aksen memakai var(--primary) (mengikuti tema: gelap #3DB57F, kertas merah),
+   BUKAN var(--primary-1) yang tetap hijau tua di tema gelap.
    ========================================================= */
 
 /* ---------- 1. NAVIGASI BAWAH ----------
@@ -27,7 +30,7 @@
 }
 
 /* ---------- 2. AVATAR + MENU ---------- */
-.avatar.is-active{border-color:var(--primary-1);box-shadow:0 0 0 3px var(--primary-soft)}
+.avatar.is-active{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
 html[data-theme="paper"] .avatar.is-active{border-color:var(--primary-1);box-shadow:0 0 0 3px rgba(208,31,42,.28),0 2px 0 #D5D8DE}
 
 .ux-menu{display:grid;gap:10px}
@@ -36,7 +39,7 @@ html[data-theme="paper"] .avatar.is-active{border-color:var(--primary-1);box-sha
   border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);color:var(--text)
 }
 .ux-menu button:active{transform:scale(.98)}
-.ux-menu svg{width:24px;height:24px;flex:0 0 auto;color:var(--primary-1)}
+.ux-menu svg{width:24px;height:24px;flex:0 0 auto;color:var(--primary)}
 .ux-menu button>span{display:block;min-width:0}
 .ux-menu b{display:block;font-size:15px}
 .ux-menu button>span>span{display:block;margin-top:2px;font-size:12px;color:var(--muted)}
@@ -49,3 +52,13 @@ html[data-theme="paper"] .ux-menu button{background:#F5F6F8;box-shadow:0 2px 0 #
 @media(max-width:699px){
   #page-beranda .bento-grid>.bento-card:nth-child(n+4):not(.amber){order:1}
 }
+
+/* ---------- 4. TAHAP 2 ---------- */
+/* 2a. Ikon judul kartu Beranda (disisipkan ux2.js). Di kartu emerald/amber ikut warna teks kartu. */
+.ti{display:inline-flex;vertical-align:-3px;margin-right:8px;color:var(--primary)}
+.ti svg{width:20px;height:20px}
+.bento-card.emerald .ti,.bento-card.amber .ti{color:inherit}
+
+/* 2b. Kartu tanpa blur: latar nyaris polos sehingga blur nyaris tak terlihat, tetapi membebani scroll di HP
+   kelas menengah. .pill-nav dan lapisan modal tetap memakai blur. */
+.bento-card{-webkit-backdrop-filter:none;backdrop-filter:none}
