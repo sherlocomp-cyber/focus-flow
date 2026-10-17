@@ -62,3 +62,10 @@ html[data-theme="paper"] .ux-menu button{background:#F5F6F8;box-shadow:0 2px 0 #
 /* 2b. Kartu tanpa blur: latar nyaris polos sehingga blur nyaris tak terlihat, tetapi membebani scroll di HP
    kelas menengah. .pill-nav dan lapisan modal tetap memakai blur. */
 .bento-card{-webkit-backdrop-filter:none;backdrop-filter:none}
+
+/* 2d. Tipografi (opsi B): serif sistem untuk judul besar dan nama merek di semua tema, tanpa aset baru (tetap offline).
+   --paper-serif hanya terdefinisi di tema kertas, jadi tumpukan font yang sama ditulis di sini sebagai token global.
+   Tema kertas sudah memakai aturan setara (paper.css, spesifisitas lebih tinggi), jadi tampilannya tidak berubah. */
+:root{--ff-serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Noto Serif",serif}
+.display,.brand>span:last-child{font-family:var(--ff-serif)}
+.display{font-weight:700;letter-spacing:-.035em}
