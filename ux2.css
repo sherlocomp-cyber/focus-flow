@@ -1,0 +1,51 @@
+/* =========================================================
+   FOCUSFLOW — UX2.CSS  ·  Tahap 1 (perbaikan UX)
+   Dimuat SETELAH paper.css. Hanya koreksi; tidak mengubah berkas lain.
+   1. Navigasi bawah: 5 tujuan utama, semua label terlihat
+      (Insight & Pengaturan dipindah ke menu avatar, lihat ux2.js)
+   2. Avatar: penanda aktif + isi menu
+   3. Beranda (HP): timer mini naik tepat setelah kartu Katak
+   ========================================================= */
+
+/* ---------- 1. NAVIGASI BAWAH ----------
+   .nav-bottom hanya tampil < 1080px; di atas itu .nav-top memuat ketujuh halaman. */
+.nav-bottom .nav-item[data-route="insight"],
+.nav-bottom .nav-item[data-route="pengaturan"]{display:none}
+
+@media(max-width:699px){
+  /* Lima item sama lebar; label selalu tampil (sebelumnya disembunyikan < 430px) */
+  .nav-bottom .nav-item,
+  .nav-bottom .nav-item.active{flex:1 1 0;padding:0 2px;border-radius:22px}
+  .nav-bottom .nav-item:not(.active) span,
+  .nav-bottom .nav-item.active span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px}
+}
+/* HP sangat sempit (mis. 320px): "Kebiasaan" tidak muat pada 10px */
+@media(max-width:359px){
+  .nav-bottom{padding-left:4px;padding-right:4px}
+  .nav-bottom .nav-item:not(.active) span,
+  .nav-bottom .nav-item.active span{font-size:9px;letter-spacing:-.01em}
+}
+
+/* ---------- 2. AVATAR + MENU ---------- */
+.avatar.is-active{border-color:var(--primary-1);box-shadow:0 0 0 3px var(--primary-soft)}
+html[data-theme="paper"] .avatar.is-active{border-color:var(--primary-1);box-shadow:0 0 0 3px rgba(208,31,42,.28),0 2px 0 #D5D8DE}
+
+.ux-menu{display:grid;gap:10px}
+.ux-menu button{
+  display:flex;align-items:center;gap:14px;width:100%;min-height:64px;padding:14px 16px;text-align:left;
+  border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);color:var(--text)
+}
+.ux-menu button:active{transform:scale(.98)}
+.ux-menu svg{width:24px;height:24px;flex:0 0 auto;color:var(--primary-1)}
+.ux-menu button>span{display:block;min-width:0}
+.ux-menu b{display:block;font-size:15px}
+.ux-menu button>span>span{display:block;margin-top:2px;font-size:12px;color:var(--muted)}
+html[data-theme="paper"] .ux-menu button{background:#F5F6F8;box-shadow:0 2px 0 #E6E8EC}
+
+/* ---------- 3. BERANDA (HP, satu kolom) ----------
+   Urutan DOM: hero, Top 3, Katak, Tujuan, Streak, Grafik, Timer mini (.amber), Menggantung.
+   Kartu ke-4 dst. (kecuali timer) didorong satu tingkat, sehingga timer mini muncul setelah Katak.
+   Dibatasi < 700px: pada grid 2/4 kolom perubahan urutan meninggalkan lubang. */
+@media(max-width:699px){
+  #page-beranda .bento-grid>.bento-card:nth-child(n+4):not(.amber){order:1}
+}
