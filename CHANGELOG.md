@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.1] — 2026-10-18
+
+### Diperbaiki
+- Teks siklus di halaman Fokus tidak lagi menampilkan "5/4 fokus", "9/4", dan seterusnya. Kini menunjukkan posisi dalam siklus 4 sesi: istirahat panjang tampil 4/4, lalu kembali ke 0/4. Hanya tampilan; logika timer tidak berubah (`ux2.js`).
+
 ## [1.1.0] — 2026-10-18
 
 UX tahap 1 dan 2 (lapisan `ux2.css`/`ux2.js`), tipografi serif, dan sinkronisasi versi. Entri 1.0.3 sampai 1.0.5 yang sebelumnya belum tercatat (`focus-plus.js`, `features.js`) ikut dicatat di sini, disusun dari riwayat commit.

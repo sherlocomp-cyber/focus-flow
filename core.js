@@ -1,7 +1,7 @@
 /* =========================================================
    01. DATA LAYER — localStorage aman + seed realistis
    ========================================================= */
-const APP_VERSION="1.1.0",SCHEMA_VERSION=1;
+const APP_VERSION="1.1.1",SCHEMA_VERSION=1;
 const STORAGE_KEYS={
   goals:"ff:goals",habits:"ff:habits",habitLogs:"ff:habitLogs",tasks:"ff:tasks",
   projects:"ff:projects",sessions:"ff:sessions",profile:"ff:profile",

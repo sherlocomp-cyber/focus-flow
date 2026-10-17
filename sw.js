@@ -1,5 +1,5 @@
 /* FocusFlow service worker — jaringan dulu, cadangan dari cache (offline penuh) */
-const CACHE="focusflow-v1.1.0";
+const CACHE="focusflow-v1.1.1";
 const ASSETS=["./","index.html","styles.css","improve.css","ux.css","paper.css","core.js","goals-tasks.js","habits-focus.js","init.js","improve.js","paper.js","focus-plus.js","features.js","ux2.css","ux2.js","manifest.webmanifest","icon.svg"];
 /* Aset di-cache satu per satu: satu berkas gagal/hilang tidak membatalkan pemasangan service worker */
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>Promise.allSettled(ASSETS.map(a=>c.add(a)))).then(()=>self.skipWaiting()))});
