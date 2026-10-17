@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.1.0] — 2026-10-18
+
+UX tahap 1 dan 2 (lapisan `ux2.css`/`ux2.js`), tipografi serif, dan sinkronisasi versi. Entri 1.0.3 sampai 1.0.5 yang sebelumnya belum tercatat (`focus-plus.js`, `features.js`) ikut dicatat di sini, disusun dari riwayat commit.
+
+### Ditambahkan
+- **Navigasi bawah 5 item** (Beranda, Fokus, Tugas, Kebiasaan, Tujuan) dengan semua label terlihat. Di layar di bawah 1080 px, **avatar menjadi menu** ke Insight dan Pengaturan dan bercincin saat salah satunya aktif. Navigasi atas di desktop tetap 7 item.
+- **Imersif otomatis saat mulai** (Pengaturan sesi), bawaan mati. Hanya aktif bila sesi dimulai lewat gerakan pengguna; keluar sendiri saat modal refleksi dibuka.
+- Ikon SVG menggantikan emoji di judul kartu Beranda, sehingga ikut warna tema (termasuk Kertas).
+- `focus-plus.js` (1.0.3): perbaikan timer yang tidak pernah selesai, waktu aktif, ambient, timer bertahan saat muat ulang, target harian.
+- `features.js` (1.0.4): tautan habit–goal, kalender bulanan, mode fokus imersif manual.
+- `aria-checked` pada semua switch (`#focusAutoStart`, `#ffNoBreak`, `#ffAutoZen`) agar pembaca layar tahu statusnya.
+
+### Diubah
+- Judul besar (`.display`) dan nama merek memakai serif sistem di semua tema (tumpukan yang sama dengan tema Kertas, tanpa aset baru). Teks isi tetap Inter.
+- Di Beranda HP (di bawah 700 px), timer mini naik ke setelah kartu Katak.
+- Chip "Aktif" pada aturan istirahat panjang diganti teks "Otomatis" karena bukan kontrol.
+- Kartu tidak lagi memakai `backdrop-filter` (blur hampir tak terlihat, tetapi memberatkan scroll di HP kelas menengah).
+- Tombol info "i" Cirillo yang duplikat dihapus dari kartu *Fokus 7 hari* dan *Fokus sekarang* di Beranda.
+
+### Diperbaiki
+- `prepare-www.js` kini menyalin `ux2.css` dan `ux2.js` ke `www/`; sebelumnya APK tidak memuat perbaikan UX.
+- Versi disamakan: `APP_VERSION`, `CACHE` service worker, dan `package.json` semuanya 1.1.0 (sebelumnya 1.0.1, v1.0.5, dan 1.1.0).
+- Pilihan tema di Pengaturan salah menampilkan "Sistem" (`window.DB` tidak ada); versi di aplikasi kini mengikuti `APP_VERSION`.
+
 ## [1.0.2] — 2026-10-15
 
 Sinkronisasi berkas aplikasi, service worker, dan dokumentasi.

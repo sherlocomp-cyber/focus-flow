@@ -50,20 +50,24 @@ Workflow **Build APK** berjalan otomatis di setiap push ke `main`/`master` (dan 
 | `styles.css` | Gaya dasar |
 | `improve.css` | Perbaikan kontras, keterbacaan, aksesibilitas, dan polish UX (dimuat setelah `styles.css`) |
 | `ux.css` | Penyempurnaan UI/UX v1.0.1: banner, kartu habit mobile, tombol info, navigasi desktop (dimuat setelah `improve.css`) |
-| `paper.css` | Tema "Kertas 3D"; aturan tema aktif saat `data-theme="paper"` (dimuat terakhir) |
+| `paper.css` | Tema "Kertas 3D"; aturan tema aktif saat `data-theme="paper"` (dimuat setelah `ux.css`) |
+| `ux2.css` | Lapisan UX tahap 1 dan 2: navigasi bawah 5 item, menu avatar, urutan Beranda HP, ikon judul, kartu tanpa blur, serif untuk judul (dimuat terakhir) |
 | `core.js` | Data layer, logika, komponen UI, modal, insight, pengaturan |
 | `goals-tasks.js` | Modul goal dan tugas |
 | `habits-focus.js` | Modul habit dan mesin fokus (timer, audio, notifikasi) |
 | `init.js` | Inisialisasi, aksesibilitas modal, registrasi service worker |
 | `improve.js` | Penyempurnaan perilaku UI (dimuat setelah `init.js`) |
-| `paper.js` | Perilaku tema Kertas (dimuat terakhir) |
+| `paper.js` | Perilaku tema Kertas (dimuat setelah `improve.js`) |
+| `focus-plus.js` | Penyempurnaan timer fokus: selesai tepat waktu, waktu aktif, ambient, timer bertahan saat muat ulang, target harian |
+| `features.js` | Tautan habit–goal, kalender bulanan, mode fokus imersif |
+| `ux2.js` | Menu avatar, imersif otomatis, ikon judul Beranda, `aria-checked` switch (dimuat terakhir) |
 | `manifest.webmanifest`, `icon.svg` | Metadata PWA dan ikon |
 | `sw.js` | Service worker untuk mode offline |
 | `prepare-www.js` | Menyalin berkas web ke `www/` untuk build APK |
 | `.github/workflows/build-apk.yml` | Workflow Build APK |
 | `CHANGELOG.md` | Riwayat versi |
 
-File JS adalah skrip klasik yang berbagi lingkup global, jadi urutan pemuatan di `index.html` harus dipertahankan. Urutan CSS juga penting: `styles.css` → `improve.css` → `ux.css` → `paper.css`.
+File JS adalah skrip klasik yang berbagi lingkup global, jadi urutan pemuatan di `index.html` harus dipertahankan. Urutan JS: `core` → `goals-tasks` → `habits-focus` → `init` → `improve` → `paper` → `focus-plus` → `features` → `ux2`. Urutan CSS juga penting: `styles.css` → `improve.css` → `ux.css` → `paper.css` → `ux2.css`.
 
 ## Pengembangan
 
