@@ -552,7 +552,6 @@ document.addEventListener("click",e=>{
 });
 
 /* ---------- 16. INISIALISASI ---------- */
-const ver=$("#appVersion");if(ver)ver.textContent="v1.5.1";
 applyTheme();
 renderHome();
 renderFocusUI();
