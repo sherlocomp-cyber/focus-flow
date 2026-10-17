@@ -136,4 +136,18 @@ step("cycle-text",()=>{
   if(typeof _r==="function")window.renderFocusUI=function(){const r=_r.apply(this,arguments);fix();return r};
   fix();   /* focus-plus.js bisa memulihkan focusCount saat muat; segarkan teks awal */
 });
+
+/* ---------- 7. KETUK "i" DI TOMBOL MODE TIDAK MENGGANTI MODE ----------
+   Ikon "i" (<i class="info" data-tip>) berada di dalam .mode-btn. Klik pada ikon itu naik ke tombol mode
+   (selectMode dipanggil) lalu ke penangan tooltip di init.js, jadi mengetuk "i" ikut mengganti mode timer.
+   Tangkap klik pada fase capture: tampilkan tooltip saja dan jangan teruskan ke tombol mode.
+   Klik pada bagian lain tombol (nama, durasi) dan keyboard (target = tombolnya) tidak terpengaruh. */
+step("mode-info-tip",()=>{
+  document.addEventListener("click",e=>{
+    const i=e.target&&e.target.closest?e.target.closest(".mode-btn .info"):null;
+    if(!i||!i.dataset.tip)return;
+    e.preventDefault();e.stopPropagation();
+    toast("Kenapa ini? "+i.dataset.tip);
+  },true);
+});
 })();
