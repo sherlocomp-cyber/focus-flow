@@ -83,13 +83,15 @@ html.ff-amoled[data-theme="dark"] .pill-nav{background:rgba(8,10,9,.92)}
   html.ff-amoled[data-theme="system"] .pill-nav{background:rgba(8,10,9,.92)}
 }
 
-/* 3c. Target fokus harian: bilah di kartu "Fokus 7 hari" (Beranda) */
-.ff-daily{margin-top:14px}
-.ff-daily-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12px;font-weight:800}
-.ff-daily-top span:last-child{color:var(--muted);font-weight:700}
-.ff-daily .progress-fill{background:var(--primary)}
-.ff-daily.hit .progress-fill{background:var(--success)}
-.ff-daily.hit .ff-daily-top span:last-child{color:var(--success)}
+/* 3c. Target fokus harian: bilah di kartu "Fokus 7 hari" (Beranda).
+   Nama kelas/id memakai awalan "ff-home-daily" karena focus-plus.js sudah memakai #ffDaily dan .ff-daily
+   untuk tombol target di halaman Fokus (gaya dan isi berbeda). */
+.ff-home-daily{margin-top:14px}
+.ff-home-daily-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12px;font-weight:800}
+.ff-home-daily-top span:last-child{color:var(--muted);font-weight:700}
+.ff-home-daily .progress-fill{background:var(--primary)}
+.ff-home-daily.hit .progress-fill{background:var(--success)}
+.ff-home-daily.hit .ff-home-daily-top span:last-child{color:var(--success)}
 
 /* Kartu "Tampilan & sentuhan" di Pengaturan */
 #ffLookCard .setting-row small{display:block;margin-top:2px;font-size:11px;font-weight:600;color:var(--muted)}
