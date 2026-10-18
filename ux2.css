@@ -6,6 +6,7 @@
    2. Avatar: penanda aktif + isi menu
    3. Beranda (HP): timer mini naik tepat setelah kartu Katak
    4. Tahap 2: ikon judul kartu (ux2.js), tanpa backdrop-filter pada kartu
+   5. Tahap 3: hitam murni AMOLED, target fokus harian (lihat HANDOFF-focus-flow-v3.md)
    Warna aksen memakai var(--primary) (mengikuti tema: gelap #3DB57F, kertas merah),
    BUKAN var(--primary-1) yang tetap hijau tua di tema gelap.
    ========================================================= */
@@ -69,3 +70,27 @@ html[data-theme="paper"] .ux-menu button{background:#F5F6F8;box-shadow:0 2px 0 #
 :root{--ff-serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Noto Serif",serif}
 .display,.brand>span:last-child{font-family:var(--ff-serif)}
 .display{font-weight:700;letter-spacing:-.035em}
+
+/* ---------- 5. TAHAP 3 ---------- */
+/* 3a. Hitam murni (AMOLED). Kelas .ff-amoled dipasang ux2.js pada <html>; hanya berlaku di tema gelap
+   (atau sistem yang sedang gelap), jadi tema terang dan kertas tidak berubah. Piksel hitam pada panel AMOLED mati total. */
+html.ff-amoled[data-theme="dark"]{--bg:#000;--surface:rgba(12,15,13,.88);--surface-solid:#0A0D0B;--line:rgba(236,239,236,.12)}
+html.ff-amoled[data-theme="dark"] body{background:#000}
+html.ff-amoled[data-theme="dark"] .pill-nav{background:rgba(8,10,9,.92)}
+@media(prefers-color-scheme:dark){
+  html.ff-amoled[data-theme="system"]{--bg:#000;--surface:rgba(12,15,13,.88);--surface-solid:#0A0D0B;--line:rgba(236,239,236,.12)}
+  html.ff-amoled[data-theme="system"] body{background:#000}
+  html.ff-amoled[data-theme="system"] .pill-nav{background:rgba(8,10,9,.92)}
+}
+
+/* 3c. Target fokus harian: bilah di kartu "Fokus 7 hari" (Beranda) */
+.ff-daily{margin-top:14px}
+.ff-daily-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12px;font-weight:800}
+.ff-daily-top span:last-child{color:var(--muted);font-weight:700}
+.ff-daily .progress-fill{background:var(--primary)}
+.ff-daily.hit .progress-fill{background:var(--success)}
+.ff-daily.hit .ff-daily-top span:last-child{color:var(--success)}
+
+/* Kartu "Tampilan & sentuhan" di Pengaturan */
+#ffLookCard .setting-row small{display:block;margin-top:2px;font-size:11px;font-weight:600;color:var(--muted)}
+#ffLookCard .setting-row>span{min-width:0}
