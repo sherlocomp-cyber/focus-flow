@@ -6,6 +6,7 @@
    1. Avatar = menu ke Insight & Pengaturan pada layar < 1080px
       (di sana navigasi bawah hanya memuat 5 tujuan utama; lihat ux2.css)
    2. Mode imersif otomatis saat sesi fokus dimulai (opsional, bawaan MATI)
+   Tahap 3 (bagian 8-10): hitam murni AMOLED, getar sentuhan, target fokus harian
    ========================================================= */
 (function(){
 "use strict";
@@ -149,5 +150,102 @@ step("mode-info-tip",()=>{
     e.preventDefault();e.stopPropagation();
     toast("Kenapa ini? "+i.dataset.tip);
   },true);
+});
+
+/* =========================================================
+   TAHAP 3 — HP AMOLED (lihat HANDOFF-focus-flow-v3.md)
+   Pengaturan baru disimpan di DB.profile.settings: amoled (bool, bawaan mati),
+   haptics (bool, bawaan nyala), dailyGoalMin (menit; 0 = mati, bawaan 60).
+   ========================================================= */
+const S3=()=>DB.profile.settings;
+const mqDark=window.matchMedia("(prefers-color-scheme: dark)");
+
+/* ---------- 8. HITAM MURNI (AMOLED) ----------
+   CSS ada di ux2.css (html.ff-amoled, hanya tema gelap / sistem-gelap). Di sini: pasang kelas dan
+   samakan warna bilah sistem (<meta theme-color>) menjadi #000 saat gelap + AMOLED. improve.js
+   mengatur ulang meta itu setiap applyTheme, jadi diterapkan lagi setelahnya. */
+step("amoled",()=>{
+  const dark=()=>{const t=S3().theme||"system";return t==="gelap"||(t==="system"&&mqDark.matches)};
+  const apply=()=>{
+    document.documentElement.classList.toggle("ff-amoled",!!S3().amoled);
+    if(S3().amoled&&dark())document.querySelectorAll('meta[name="theme-color"]').forEach(m=>{m.content="#000000"});
+  };
+  const _theme=window.applyTheme;
+  window.applyTheme=function(){const r=_theme.apply(this,arguments);step("amoled-apply",apply);return r};
+  if(mqDark.addEventListener)mqDark.addEventListener("change",()=>window.applyTheme());
+  window.__ffAmoledApply=()=>window.applyTheme();
+  apply();
+});
+
+/* ---------- 9. KARTU PENGATURAN "TAMPILAN & SENTUHAN" + GETAR ----------
+   Kartu disisipkan setelah kartu Streak freeze di Pengaturan. Getar halus (8 ms; 12 ms untuk centang)
+   pada kontrol utama; motor linear di HP kelas atas membuatnya terasa seperti ketukan, bukan dengung. */
+step("look-card",()=>{
+  const freeze=$i("useFreezeBtn"),host=freeze&&freeze.closest("article");
+  if(!host||$i("ffLookCard"))return;
+  const goals=[0,30,60,90,120,180,240];
+  host.insertAdjacentHTML("afterend",
+    '<article class="bento-card glass span-4" id="ffLookCard">'+
+      '<h2 class="card-title">Tampilan &amp; sentuhan</h2>'+
+      '<p class="card-subtitle">Dioptimalkan untuk layar AMOLED di HP.</p>'+
+      '<div class="setting-row"><span>Hitam murni (AMOLED)<small>Latar #000 di tema gelap, hemat baterai.</small></span>'+
+        '<button class="toggle" id="ffAmoled" type="button" role="switch" aria-checked="false" aria-label="Hitam murni AMOLED"><i></i></button></div>'+
+      '<div class="setting-row"><span>Getar sentuhan<small>Getaran halus saat mengetuk tombol utama.</small></span>'+
+        '<button class="toggle" id="ffHaptics" type="button" role="switch" aria-checked="false" aria-label="Getar sentuhan"><i></i></button></div>'+
+      '<label class="setting-row"><span>Target fokus harian<small>Bilah progres tampil di Beranda.</small></span>'+
+        '<select class="filter-select" id="ffDailyGoal" aria-label="Target fokus harian">'+
+        goals.map(g=>'<option value="'+g+'">'+(g?g+" menit":"Mati")+'</option>').join("")+'</select></label>'+
+    '</article>');
+
+  const bind=(id,key,dflt,after)=>{
+    const b=$i(id),get=()=>S3()[key]===undefined?dflt:!!S3()[key];
+    const paint=()=>{b.classList.toggle("on",get());b.setAttribute("aria-checked",String(get()))};
+    paint();
+    b.onclick=()=>{S3()[key]=!get();saveDB();paint();if(after)after()};
+  };
+  bind("ffAmoled","amoled",false,()=>window.__ffAmoledApply&&window.__ffAmoledApply());
+  bind("ffHaptics","haptics",true);
+  const sel=$i("ffDailyGoal");
+  sel.value=String(S3().dailyGoalMin===undefined?60:S3().dailyGoalMin);
+  sel.onchange=()=>{S3().dailyGoalMin=+sel.value;saveDB();window.__ffDailyRender&&window.__ffDailyRender()};
+});
+
+step("haptics",()=>{
+  if(!navigator.vibrate)return;
+  const SEL=".nav-item,.task-check,.tm-check,.habit-check-btn,.toggle,.mode-btn,.task-tab,#focusStart,#miniStart,.pill-btn.primary";
+  document.addEventListener("click",e=>{
+    if(S3().haptics===false)return;
+    const t=e.target&&e.target.closest?e.target.closest(SEL):null;
+    if(!t||t.disabled)return;
+    try{navigator.vibrate(t.matches(".task-check,.tm-check,.habit-check-btn")?12:8)}catch(_){}
+  },true);
+});
+
+/* ---------- 10. TARGET FOKUS HARIAN ----------
+   Bilah "Target hari ini: x / y menit" di kartu "Fokus 7 hari" (Beranda). Menit hari ini = elemen terakhir
+   focusByDay() (hanya sesi selesai). Selebrasi sekali saat melintasi target selama aplikasi terbuka;
+   saat aplikasi pertama dibuka dengan target sudah terlampaui tidak ada selebrasi. */
+step("daily-goal",()=>{
+  let last=null;
+  const goal=()=>{const g=S3().dailyGoalMin;return g===undefined?60:(+g||0)};
+  const render=()=>step("daily-render",()=>{
+    const chart=$i("focusChart"),card=chart&&chart.closest(".bento-card");if(!card)return;
+    let box=$i("ffDaily");const g=goal();
+    if(!g){if(box)box.remove();last=null;return}
+    const today=focusByDay()[6]||0,pct=Math.min(100,Math.round(today/g*100)),hit=today>=g;
+    if(!box){box=document.createElement("div");box.id="ffDaily";box.className="ff-daily";card.appendChild(box)}
+    box.classList.toggle("hit",hit);
+    box.innerHTML='<div class="ff-daily-top"><span>Target hari ini</span><span>'+today+' / '+g+' menit'+(hit?' ✓':'')+'</span></div>'+
+      '<div class="progress-track" role="progressbar" aria-label="Target fokus harian" aria-valuemin="0" aria-valuemax="'+g+'" aria-valuenow="'+Math.min(today,g)+'"><div class="progress-fill" style="width:'+pct+'%"></div></div>';
+    if(last!==null&&last<g&&today>=g){
+      toast("Target fokus hari ini tercapai. Mantap! 🎉");
+      try{if(navigator.vibrate&&S3().haptics!==false)navigator.vibrate([60,40,60])}catch(_){}
+    }
+    last=today;
+  });
+  window.__ffDailyRender=render;
+  const _home=window.renderHome;
+  window.renderHome=function(){const r=_home.apply(this,arguments);render();return r};
+  render();
 });
 })();
