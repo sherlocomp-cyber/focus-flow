@@ -8,6 +8,8 @@
    2. Mode imersif otomatis saat sesi fokus dimulai (opsional, bawaan MATI)
    Tahap 3 (bagian 8-10): hitam murni AMOLED, getar sentuhan, target fokus harian
    Tahap 5 (bagian 11-14): filter "Hari ini", geser kartu tugas, tugas berulang, ringkasan mingguan
+   Tahap 4 (bagian 15, jembatan JS): tombol Kembali Android, getar lewat plugin, warna bilah status;
+   aktif hanya bila plugin Capacitor-nya terpasang di APK
    ========================================================= */
 (function(){
 "use strict";
@@ -225,18 +227,21 @@ step("haptics",()=>{
 /* ---------- 10. TARGET FOKUS HARIAN ----------
    Bilah "Target hari ini: x / y menit" di kartu "Fokus 7 hari" (Beranda). Menit hari ini = elemen terakhir
    focusByDay() (hanya sesi selesai). Selebrasi sekali saat melintasi target selama aplikasi terbuka;
-   saat aplikasi pertama dibuka dengan target sudah terlampaui tidak ada selebrasi. */
+   saat aplikasi pertama dibuka dengan target sudah terlampaui tidak ada selebrasi.
+   Id/kelas bilah ini #ffHomeDaily / .ff-home-daily: focus-plus.js sudah memakai #ffDaily dan .ff-daily untuk
+   tombol target di halaman Fokus (setelan lain: dailyTargetMin, bawaan 120). Nama yang sama membuat bilah Beranda
+   tidak pernah dibuat dan isi tombol di halaman Fokus tertimpa. */
 step("daily-goal",()=>{
   let last=null;
   const goal=()=>{const g=S3().dailyGoalMin;return g===undefined?60:(+g||0)};
   const render=()=>step("daily-render",()=>{
     const chart=$i("focusChart"),card=chart&&chart.closest(".bento-card");if(!card)return;
-    let box=$i("ffDaily");const g=goal();
+    let box=$i("ffHomeDaily");const g=goal();
     if(!g){if(box)box.remove();last=null;return}
     const today=focusByDay()[6]||0,pct=Math.min(100,Math.round(today/g*100)),hit=today>=g;
-    if(!box){box=document.createElement("div");box.id="ffDaily";box.className="ff-daily";card.appendChild(box)}
+    if(!box){box=document.createElement("div");box.id="ffHomeDaily";box.className="ff-home-daily";card.appendChild(box)}
     box.classList.toggle("hit",hit);
-    box.innerHTML='<div class="ff-daily-top"><span>Target hari ini</span><span>'+today+' / '+g+' menit'+(hit?' ✓':'')+'</span></div>'+
+    box.innerHTML='<div class="ff-home-daily-top"><span>Target hari ini</span><span>'+today+' / '+g+' menit'+(hit?' ✓':'')+'</span></div>'+
       '<div class="progress-track" role="progressbar" aria-label="Target fokus harian" aria-valuemin="0" aria-valuemax="'+g+'" aria-valuenow="'+Math.min(today,g)+'"><div class="progress-fill" style="width:'+pct+'%"></div></div>';
     if(last!==null&&last<g&&today>=g){
       toast("Target fokus hari ini tercapai. Mantap! 🎉");
@@ -435,5 +440,80 @@ step("weekly-summary",()=>{
     catch(e){toast("Ringkasan gagal dibuat.")}
   };
   window.__ffWeeklyBuild=build;
+});
+
+/* =========================================================
+   TAHAP 4 (JEMBATAN JS) — PLUGIN CAPACITOR DENGAN FALLBACK (lihat HANDOFF-focus-flow-v3.md bagian 4)
+   15 tombol Kembali Android, getar lewat plugin, warna bilah status.
+   Setiap blok hanya aktif bila plugin-nya benar-benar terpasang di APK (window.Capacitor.Plugins.<Nama>);
+   di browser/PWA tidak ada yang berubah. Pemasangan plugin (npm i, cap sync) menunggu sesi dengan clone.
+   Pengingat lokal (@capacitor/local-notifications) dan keep-awake sengaja belum disentuh.
+   ========================================================= */
+const capPlugins=()=>{
+  const c=window.Capacitor;
+  if(!c||!c.Plugins)return null;
+  if(typeof c.isNativePlatform==="function"&&!c.isNativePlatform())return null;
+  return c.Plugins;
+};
+const quiet=r=>{if(r&&typeof r.catch==="function")r.catch(()=>{})};
+
+/* ---------- 15a. TOMBOL KEMBALI ANDROID ----------
+   Urutan: tutup modal → keluar layar penuh → keluar imersif → ke Beranda → keluar aplikasi.
+   Tanpa pendengar ini WebView menutup aplikasi (rute tidak memakai history, jadi tidak ada yang bisa "kembali"). */
+step("native-back",()=>{
+  const P=capPlugins(),A=P&&P.App;
+  if(!A||typeof A.addListener!=="function")return;
+  const back=()=>{
+    const bd=$i("modalBackdrop");
+    if(bd&&bd.classList.contains("open")){closeModal();return"modal"}
+    if(document.fullscreenElement){quiet(document.exitFullscreen());return"fullscreen"}
+    if(document.body.classList.contains("ff-zen")){const z=$i("ffZen");if(z)z.click();return"zen"}
+    if(currentRoute&&currentRoute!=="beranda"){goTo("beranda");return"beranda"}
+    if(typeof A.exitApp==="function")A.exitApp();
+    return"exit";
+  };
+  window.__ffBack=back;
+  const r=A.addListener("backButton",back);
+  if(r&&typeof r.catch==="function")r.catch(e=>{try{console.error("[ux2] native-back",e)}catch(_){}});
+});
+
+/* ---------- 15b. GETAR LEWAT @capacitor/haptics ----------
+   Bagian 9 dan 10 memanggil navigator.vibrate(8|12|[...]). Bila plugin ada, ketukan pendek (≤ 20 ms) dialihkan ke
+   Haptics.impact (lebih halus; plugin juga menambah izin VIBRATE di manifest). Pola panjang tetap lewat vibrate asli. */
+step("native-haptics",()=>{
+  const P=capPlugins(),H=P&&P.Haptics;
+  if(!H||typeof H.impact!=="function")return;
+  const orig=typeof navigator.vibrate==="function"?navigator.vibrate.bind(navigator):null;
+  navigator.vibrate=function(p){
+    if(typeof p==="number"&&p>0&&p<=20){
+      try{quiet(H.impact({style:p>=12?"MEDIUM":"LIGHT"}));return true}catch(_){}
+    }
+    return orig?orig(p):false;
+  };
+});
+
+/* ---------- 15c. WARNA BILAH STATUS IKUT TEMA ----------
+   Membaca --bg dari tema yang sedang aktif (terang, gelap, hitam murni, kertas) setelah setiap applyTheme. */
+step("native-statusbar",()=>{
+  const P=capPlugins(),SB=P&&P.StatusBar;
+  if(!SB||typeof SB.setBackgroundColor!=="function")return;
+  const hex=s=>{
+    s=String(s||"").trim();
+    let m=/^#([0-9a-f]{3})$/i.exec(s);
+    if(m)return"#"+m[1].split("").map(ch=>ch+ch).join("").toUpperCase();
+    m=/^#([0-9a-f]{6})$/i.exec(s);
+    return m?"#"+m[1].toUpperCase():"";
+  };
+  const sync=()=>{
+    const c=hex(getComputedStyle(document.documentElement).getPropertyValue("--bg"));
+    if(!c)return;
+    const n=parseInt(c.slice(1),16),lum=(0.299*((n>>16)&255)+0.587*((n>>8)&255)+0.114*(n&255))/255;
+    try{quiet(SB.setBackgroundColor({color:c}))}catch(_){}
+    try{if(typeof SB.setStyle==="function")quiet(SB.setStyle({style:lum<.5?"DARK":"LIGHT"}))}catch(_){}
+  };
+  const _theme=window.applyTheme;
+  window.applyTheme=function(){const r=_theme.apply(this,arguments);step("statusbar-sync",sync);return r};
+  window.__ffStatusBarSync=sync;
+  sync();
 });
 })();
