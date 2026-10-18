@@ -3,7 +3,7 @@
    Wrapper fungsi global, tanpa mengubah berkas inti.
    1. Habit <-> goal: ubah tautan dari detail habit; habit tertaut tampil di roadmap goal
    2. Kalender bulanan (tab Tugas > Bulan): tenggat, goal, habit, menit fokus; seret tugas ke hari lain
-   3. Fokus imersif: mode zen layar penuh, Wake Lock saat timer jalan, opsi tanpa istirahat
+   3. Fokus imersif: mode zen layar penuh, opsi tanpa istirahat (Wake Lock: improve.js bagian 10)
    ========================================================= */
 (function(){
 "use strict";
@@ -169,20 +169,7 @@ step("zen",()=>{
     return r;
   };
 
-  /* Wake Lock: layar tetap menyala selama timer berjalan */
-  let lock=null,busy=false;
-  const wl=async()=>{
-    if(busy||!navigator.wakeLock)return;
-    busy=true;
-    try{
-      if(fs.running&&!lock&&document.visibilityState==="visible"){
-        lock=await navigator.wakeLock.request("screen");
-        lock.addEventListener("release",()=>{lock=null});
-      }else if(!fs.running&&lock){const l=lock;lock=null;await l.release()}
-    }catch(e){lock=null}
-    busy=false;
-  };
-  setInterval(wl,2000);
-  document.addEventListener("visibilitychange",wl);
+  /* Wake Lock: ditangani improve.js bagian 10 (syncWakeLock, dipanggil dari renderFocusUI dan visibilitychange).
+     Dulu ada salinan kedua di sini sehingga dua kunci layar diminta bersamaan; salinan itu dihapus (Tahap 6a). */
 });
 })();
