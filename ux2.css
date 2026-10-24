@@ -96,3 +96,20 @@ html.ff-amoled[data-theme="dark"] .pill-nav{background:rgba(8,10,9,.92)}
 /* Kartu "Tampilan & sentuhan" di Pengaturan */
 #ffLookCard .setting-row small{display:block;margin-top:2px;font-size:11px;font-weight:600;color:var(--muted)}
 #ffLookCard .setting-row>span{min-width:0}
+
+/* ===== 7. Perbaikan tampilan setelah audit 24 Okt 2026 ===== */
+/* 7a Hero Beranda (layar lebar): sapaan tidak lagi tertimpa matahari/diorama */
+@media (min-width:700px){
+  .hero .hero-copy{max-width:50%}
+  html[data-theme="paper"] .hero .paper-diorama{width:50%}
+}
+/* 7b Ruang Fokus (HP): judul memakai lebar penuh, tombol Imersif/Layar penuh di bawahnya,
+   dan "Mulai fokus" jadi satu-satunya tombol utama (Lewati/Reset dibuat sekunder) */
+@media (max-width:699px){
+  #page-fokus .focus-main-card>.card-head{flex-wrap:wrap;gap:10px}
+  #page-fokus .focus-main-card>.card-head>div:first-child{flex:1 1 100%;min-width:0}
+  #page-fokus .focus-actions{gap:10px}
+  #page-fokus #focusStart{order:-1;flex:1 1 100%;min-height:54px;font-size:17px}
+  #page-fokus #focusSkip,#page-fokus #focusReset{flex:1 1 0;background:rgba(255,255,255,.14);color:#fff;
+    box-shadow:none;border:1px solid rgba(255,255,255,.45)}
+}
