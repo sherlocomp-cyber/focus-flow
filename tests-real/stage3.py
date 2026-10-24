@@ -2,8 +2,8 @@
 
 Pakai:  python3 -m http.server 8765 --bind 127.0.0.1 &   (dari akar repo)
         python3 tests-real/stage3.py
-Butuh: playwright (chromium). Status: DITULIS tetapi BELUM PERNAH DIJALANKAN (ditulis dari sesi tanpa clone);
-jalankan dulu dan perbaiki skrip bila perlu sebelum menganggap Tahap 3 terverifikasi.
+Butuh: playwright (chromium). Status: DIJALANKAN 24 Okt 2026 (sesi dengan clone): 14 uji, 0 gagal.
+Selektor bilah target Beranda = #ffHomeDaily (bukan #ffDaily, itu tombol target di halaman Fokus milik focus-plus.js).
 """
 import sys
 from playwright.sync_api import sync_playwright
@@ -77,21 +77,21 @@ with sync_playwright() as p:
     # --- target harian ---
     pg.evaluate("goTo('beranda')")
     pg.wait_for_timeout(300)
-    ok("bilah target ada (0 / 60)", "0 / 60" in pg.inner_text("#ffDaily"), pg.inner_text("#ffDaily"))
+    ok("bilah target ada (0 / 60)", "0 / 60" in pg.inner_text("#ffHomeDaily"), pg.inner_text("#ffHomeDaily"))
     pg.evaluate("()=>{DB.sessions.push({id:'t1',completed:true,actualMin:30,startedAt:new Date().toISOString()});saveDB();renderHome()}")
-    t = pg.inner_text("#ffDaily")
+    t = pg.inner_text("#ffHomeDaily")
     ok("30 menit -> '30 / 60'", "30 / 60" in t, t)
     pg.evaluate("()=>{DB.sessions.push({id:'t2',completed:true,actualMin:35,startedAt:new Date().toISOString()});saveDB();renderHome()}")
     pg.wait_for_timeout(200)
-    t = pg.inner_text("#ffDaily")
+    t = pg.inner_text("#ffHomeDaily")
     toast = pg.inner_text("#toast")
-    ok("65 menit -> tercapai (hit) + toast selebrasi", pg.evaluate("ffDaily.classList.contains('hit')") and "tercapai" in toast, [t, toast])
+    ok("65 menit -> tercapai (hit) + toast selebrasi", pg.evaluate("ffHomeDaily.classList.contains('hit')") and "tercapai" in toast, [t, toast])
     pg.screenshot(path="s3-target-beranda.png")
     pg.evaluate("goTo('pengaturan')")
     pg.select_option("#ffDailyGoal", "0")
     pg.evaluate("goTo('beranda')")
     pg.wait_for_timeout(200)
-    ok("target 'Mati' -> bilah hilang", pg.locator("#ffDaily").count() == 0)
+    ok("target 'Mati' -> bilah hilang", pg.locator("#ffHomeDaily").count() == 0)
 
     # --- regresi: ketuk 'i' di mode fokus tidak mengganti mode ---
     pg.evaluate("goTo('fokus')")
